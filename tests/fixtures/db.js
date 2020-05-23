@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const Account = require("../../src/models/account");
 const User = require("../../src/models/user");
-const Task = require("../../src/models/task");
+const Person = require("../../src/models/person");
 
 const accountOneId = new mongoose.Types.ObjectId();
 const accountOne = {
@@ -44,32 +44,58 @@ const userTwo = {
   accountId: accountTwo._id,
 };
 
-const taskOne = {
+const personOne = {
   _id: new mongoose.Types.ObjectId(),
-  description: "First task",
+  firstName: "First",
+  lastName: "Person",
   completed: false,
-  owner: userOne._id,
+  otherId: "123ABC",
+  accountId: userOne.accountId,
+  phoneNumbers: [{
+    number: "1231231234",
+    isOwnPhone: true
+  }]
 };
 
-const taskTwo = {
+const personTwo = {
   _id: new mongoose.Types.ObjectId(),
-  description: "Second task",
+  firstName: "Second",
+  lastName: "Person",
   completed: true,
-  owner: userOne._id,
+  accountId: userOne.accountId,
+  phoneNumbers: [
+  {
+    number: "1231231234",
+    isOwnPhone: false,
+    owner: "My Mother",
+    ownerRelationship: "parent"
+  },
+  {
+    number: "1231231245",
+    isOwnPhone: false,
+    owner: "My Father",
+    ownerRelationship: "parent"
+  },
+]
 };
 
-const taskThree = {
+const personThree = {
   _id: new mongoose.Types.ObjectId(),
-  description: "Third task",
+  firstName: "Third",
+  lastName: "Person",
   completed: true,
-  owner: userTwo._id,
+  accountId: userTwo.accountId,
+  phoneNumbers: [{
+    number: "2131231234",
+    isOwnPhone: true
+  }]
 };
 
 const setupDatabase = async () => {
   await Promise.all([
     Account.deleteMany(),
     User.deleteMany(),
-    Task.deleteMany(),
+    Person.deleteMany(),
   ]);
 
   await Promise.all([
@@ -80,9 +106,9 @@ const setupDatabase = async () => {
   await Promise.all([new User(userOne).save(), new User(userTwo).save()]);
 
   await Promise.all([
-    new Task(taskOne).save(),
-    new Task(taskTwo).save(),
-    new Task(taskThree).save(),
+    new Person(personOne).save(),
+    new Person(personTwo).save(),
+    new Person(personThree).save(),
   ]);
 };
 
@@ -95,8 +121,8 @@ module.exports = {
   userOne,
   userTwoId,
   userTwo,
-  taskOne,
-  taskTwo,
-  taskThree,
+  personOne,
+  personTwo,
+  personThree,
   setupDatabase,
 };
