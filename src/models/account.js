@@ -39,9 +39,16 @@ const accountSchema = new mongoose.Schema(
     },
     config: {
       type: {
-        dailySendTime: { type: Number, min: 0, max: 23 },
-        dailyAdminSendTime: { type: Number, min: 0, max: 23 }
-      }
+        messagesToPersons: {
+          dailySendTime: { type: Number, min: 0, max: 23 }, // UTC hour
+          lastSent: { type: Date, default: null }
+        },
+        messageToAdmin: {
+          dailySendTime: { type: Number, min: 0, max: 23 }, // UTC hour
+          lastSent: { type: Date }
+        },
+        timeZone: { type: String, default: null }
+       }
     }
   },
   {

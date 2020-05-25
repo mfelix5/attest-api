@@ -10,9 +10,11 @@ function start() {
     "00 * * * * *", // run every minute
     () => {
       const currentTime = new Date();
+      console.log('currentTime', currentTime)
       console.log(
         `Running SMS Worker at ${moment(currentTime).format()}`
       );
+      // messages.sendMessagesToPeopleThatMustAttest(currentTime);
       messages.sendMessagesToPeopleThatMustAttest(currentTime);
     },
     null, // don't run anything after finishing the job
