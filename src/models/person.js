@@ -40,10 +40,11 @@ const personSchema = new mongoose.Schema(
       type: Boolean,
       default: true
     },
-    phoneNumbers: [phoneSchema],
+    primaryPhone: { type: String, required: true },
+    phoneNumbers: [phoneSchema], // not used yet
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 

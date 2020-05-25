@@ -21,6 +21,7 @@ test("Should create person of concern with the user's accountId", async () => {
     .send({
       firstName: "Test",
       lastName: "User",
+      primaryPhone: "2342341234",
       phoneNumbers: [
         {
           number: "1234567890",

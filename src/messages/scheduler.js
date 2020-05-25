@@ -11,7 +11,7 @@ function start() {
     () => {
       const currentTime = new Date();
       console.log(
-        `Running Send SMS Worker for ${moment(currentTime).format()}`
+        `Running SMS Worker at ${moment(currentTime).format()}`
       );
       messages.sendMessagesToPeopleThatMustAttest(currentTime);
     },

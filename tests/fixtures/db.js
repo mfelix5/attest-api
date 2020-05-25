@@ -51,6 +51,7 @@ const personOne = {
   completed: false,
   otherId: "123ABC",
   accountId: userOne.accountId,
+  primaryPhone: "1234567890",
   phoneNumbers: [{
     number: "1231231234",
     isOwnPhone: true
@@ -63,6 +64,7 @@ const personTwo = {
   lastName: "Person",
   completed: true,
   accountId: userOne.accountId,
+  primaryPhone: "1234567899",
   phoneNumbers: [
   {
     number: "1231231234",
@@ -85,6 +87,7 @@ const personThree = {
   lastName: "Person",
   completed: true,
   accountId: userTwo.accountId,
+  primaryPhone: "1234567890",
   phoneNumbers: [{
     number: "2131231234",
     isOwnPhone: true

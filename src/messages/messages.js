@@ -1,33 +1,32 @@
 const moment = require("moment");
 const twilio = require("twilio");
 const Attestation = require("../models/attestation");
+const Account = require("../models/account");
 const Person = require("../models/person");
 
-const client = twilio(
+const twilioClient = twilio(
   process.env.TWILIO_ACCOUNT_SID,
   process.env.TWILIO_AUTH_TOKEN
 );
 
 /**
  * Sends an SMS to the specified phone number in an attestation
- *
- * @param {*} attestation
  */
 async function sendMessage(attestation) {
   const options = {
-    to: `+ ${attestation.phoneNumber}`,
+    to: `+1${attestation.phoneNumber}`,
     from: process.env.TWILIO_PHONE_NUMBER,
-    body: `Hi ${attestation.name}. I still need to build out the logic for the message body here.`,
+    body: attestation.message,
   };
 
   try {
-    client.messages.create(options);
+    twilioClient.messages.create(options);
     let masked = attestation.phoneNumber.substr(
       0,
       attestation.phoneNumber.length - 5
     );
     masked += "*****";
-    console.log(`Message sent to ${masked}`);
+    console.log(`SMS sent to ${masked}`);
   } catch (err) {
     console.error(err);
   }
@@ -40,34 +39,30 @@ async function sendMessage(attestation) {
  * @param {Date} currentTime the current time to base the message on
  */
 async function sendMessagesToPeopleThatMustAttest(currentTime) {
-  const persons = await Person.find({ active: true });
-
-  const personsThatMustAttest = persons.filter((person) => {
-    // function requiresAttestation(person, currentTime) {
-    //   return (
-    //     Math.round(
-    //       moment
-    //         .duration(
-    //           moment(person.time)
-    //             .tz(person.timeZone)
-    //             .utc()
-    //             .diff(moment(currentTime).utc())
-    //         )
-    //         .asMinutes()
-    //     ) === person.notification
-    //   );
-    // }
+  // const now = moment.utc();
+  const accounts = await Account.find({
+    active: true,
+    "config.dailySendTime": 3
   });
 
-  const attestations = personsThatMustAttest.map((person) => {
-    // create attestation record for each phone number
-    // send SMS for each
+  const personPromises = accounts.map(account => {
+    return Person.find({
+      accountId: account._id,
+      active: true
+    });
   });
+  const persons = [].concat(...(await Promise.all(personPromises)));
 
-  // attestations.push({
-  //   phoneNumber: "+18455516269",
-  //   name: "Mike"
-  // });
+  const attestationPromises = persons.map(person => {
+    return new Attestation({
+      status: "sent",
+      accountId: person.accountId,
+      personId: person._id,
+      phoneNumber: person.primaryPhone,
+      message: `Hi ${person.firstName} ${person.lastName}. Are you Ok?`
+    }).save();
+  });
+  const attestations = [].concat(...(await Promise.all(attestationPromises)));;
 
   console.log(`Sending ${attestations.length} messages`);
   attestations.forEach((attestation) => sendMessage(attestation));

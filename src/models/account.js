@@ -32,9 +32,17 @@ const accountSchema = new mongoose.Schema(
       },
       required: false,
     },
-    subscriptionExpiration: {
-      type: Date,
+    active: {
+      type: Boolean,
+      required: true,
+      default: true
     },
+    config: {
+      type: {
+        dailySendTime: { type: Number, min: 0, max: 23 },
+        dailyAdminSendTime: { type: Number, min: 0, max: 23 }
+      }
+    }
   },
   {
     timestamps: true,
