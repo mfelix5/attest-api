@@ -3,7 +3,7 @@ const app = require('../src/app')
 const Account = require('../src/models/account')
 const { accountOne, userOne, setupDatabase } = require('./fixtures/db')
 
-beforeEach(setupDatabase)
+beforeEach(setupDatabase);
 
 test('Should create a new account', async () => {
   const name = "My Test Company";
