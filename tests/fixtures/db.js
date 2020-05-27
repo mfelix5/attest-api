@@ -8,6 +8,12 @@ const accountOneId = new mongoose.Types.ObjectId();
 const accountOne = {
   _id: accountOneId,
   name: "First Account, LLC",
+  active: true,
+  config: {
+    messagesToPersons: {
+      dailySendTime: (new Date()).getUTCHours()
+    }
+  }
 };
 
 const accountTwoId = new mongoose.Types.ObjectId();
@@ -48,7 +54,6 @@ const personOne = {
   _id: new mongoose.Types.ObjectId(),
   firstName: "First",
   lastName: "Person",
-  completed: false,
   otherId: "123ABC",
   accountId: userOne.accountId,
   primaryPhone: "1234567890",
@@ -62,7 +67,6 @@ const personTwo = {
   _id: new mongoose.Types.ObjectId(),
   firstName: "Second",
   lastName: "Person",
-  completed: true,
   accountId: userOne.accountId,
   primaryPhone: "1234567899",
   phoneNumbers: [
@@ -85,11 +89,23 @@ const personThree = {
   _id: new mongoose.Types.ObjectId(),
   firstName: "Third",
   lastName: "Person",
-  completed: true,
   accountId: userTwo.accountId,
   primaryPhone: "1234567890",
   phoneNumbers: [{
     number: "2131231234",
+    isOwnPhone: true
+  }]
+};
+
+const personFour = {
+  _id: new mongoose.Types.ObjectId(),
+  active: false,
+  firstName: "Fourth",
+  lastName: "Person",
+  accountId: userTwo.accountId,
+  primaryPhone: "1234567890",
+  phoneNumbers: [{
+    number: "1531231234",
     isOwnPhone: true
   }]
 };
@@ -112,6 +128,7 @@ const setupDatabase = async () => {
     new Person(personOne).save(),
     new Person(personTwo).save(),
     new Person(personThree).save(),
+    new Person(personFour).save()
   ]);
 };
 
@@ -127,5 +144,6 @@ module.exports = {
   personOne,
   personTwo,
   personThree,
+  personFour,
   setupDatabase,
 };

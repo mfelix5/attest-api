@@ -22,7 +22,7 @@ router.get("/accounts/me", auth, async (req, res) => {
 
 router.patch("/accounts/me", auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["name", "creditCard", "address"];
+  const allowedUpdates = ["name", "creditCard", "address", "config", "lastSent"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );

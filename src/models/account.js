@@ -4,6 +4,9 @@ const statesArray = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL",
 
 const accountSchema = new mongoose.Schema(
   {
+    lastSent: {
+      type: Date
+    },
     name: {
       type: String,
       required: true,
@@ -41,13 +44,13 @@ const accountSchema = new mongoose.Schema(
       type: {
         messagesToPersons: {
           dailySendTime: { type: Number, min: 0, max: 23 }, // UTC hour
-          lastSent: { type: Date, default: null }
+          lastSent: { type: Date }
         },
         messageToAdmin: {
           dailySendTime: { type: Number, min: 0, max: 23 }, // UTC hour
           lastSent: { type: Date }
         },
-        timeZone: { type: String, default: null }
+        timeZone: { type: String }
        }
     }
   },

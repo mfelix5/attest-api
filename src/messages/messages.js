@@ -1,27 +1,32 @@
 const moment = require("moment");
 const twilio = require("twilio");
-const Attestation = require("../models/attestation");
 const Account = require("../models/account");
+const Attestation = require("../models/attestation");
 const Person = require("../models/person");
 
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+let twilioClient;
+
+if (process.env.NODE_ENV === "prod") {
+  twilioClient = twilio(
+    process.env.TWILIO_ACCOUNT_SID,
+    process.env.TWILIO_AUTH_TOKEN
+  );
+}
 
 /**
  * Sends an SMS to the specified phone number in an attestation
  */
 const sendMessage = async attestation => {
   const options = {
-    // to: `+1${attestation.phoneNumber}`,
-    to: `+18455516269`,
+    to: `+1${attestation.phoneNumber}`,
     from: process.env.TWILIO_PHONE_NUMBER,
     body: attestation.message,
   };
 
   try {
-    twilioClient.messages.create(options);
+    if (process.env.NODE_ENV = "prod") {
+      twilioClient.messages.create(options);
+    }
     let masked = attestation.phoneNumber.substr(
       0,
       attestation.phoneNumber.length - 5
@@ -34,35 +39,25 @@ const sendMessage = async attestation => {
 }
 
 const getAccountsThatAreDue = async (currentTime) => {
-  const currentUTCHour = currentTime.getUTCHours();
-  console.log('currentUTCHour', currentUTCHour)
-  const today = moment().startOf('day');
-
-  const accounts = await Account.find({
+  const today = moment(currentTime).startOf("day");
+  return await Account.find({
     active: true,
-    "config.messagesToPersons.dailySendTime": currentUTCHour,
+    "config.messagesToPersons.dailySendTime": currentTime.getUTCHours(),
     $or: [
-      { "config.messagesToPersons.lastSent": null },
-      { "config.messagesToPersons.lastSent": { $lte: today.toDate() }}
+      { lastSent: { $exists: false } },
+      { lastSent: { $lte: today }}
     ]
   });
-
-  console.log('total accounts:', accounts.length);
-  console.log('account names:', accounts.map(a => a.name));
-  return accounts;
 }
 
-const getPersonsOnAccounts = async accounts => {
-  const personPromises = accounts.map(account => {
+const getPersonsOnAccounts = async accountIds => {
+  const personPromises = accountIds.map(accountId => {
     return Person.find({
-      accountId: account._id,
+      accountId,
       active: true
     });
   });
-  const persons = [].concat(...(await Promise.all(personPromises)));
-  console.log('total persons:', persons.length);
-  console.log('persons', persons.map(p => p.firstName));
-  return persons;
+  return [].concat(...(await Promise.all(personPromises)));
 }
 
 const createAttestations = async persons => {
@@ -82,7 +77,7 @@ const createAttestations = async persons => {
 const sendMessagesToPeopleThatMustAttest = async currentTime => {
   try {
     const accounts = await getAccountsThatAreDue(currentTime);
-    const persons = await getPersonsOnAccounts(accounts);
+    const persons = await getPersonsOnAccounts(accounts.map(a => a._id));
     const attestations = await createAttestations(persons);
 
     // send SMS
@@ -90,10 +85,11 @@ const sendMessagesToPeopleThatMustAttest = async currentTime => {
     attestations.forEach((attestation) => sendMessage(attestation));
 
     // update lastSent on each account
-    const accountUpdatePromises = accounts.map(account => {
+    const accountsToUpdate = [...new Set(persons.map(p => p.accountId))];
+    const accountUpdatePromises = accountsToUpdate.map(accountId => {
       return Account.findOneAndUpdate(
-        { _id: account._id },
-        {"config.messagesToPersons.lastSent": Date.now()});
+        { _id: accountId },
+        {"config.messagesToPersons.lastSent": moment()});
     });
     await Promise.all(accountUpdatePromises);
 
@@ -103,6 +99,8 @@ const sendMessagesToPeopleThatMustAttest = async currentTime => {
 }
 
 module.exports = {
+  createAttestations,
   getAccountsThatAreDue,
+  getPersonsOnAccounts,
   sendMessagesToPeopleThatMustAttest,
 };
