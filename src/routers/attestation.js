@@ -74,7 +74,7 @@ router.get("/attestations/:id", auth, async (req, res) => {
 
 router.patch("/attestations/:id", auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["status", "healthy", "phoneNumber", "messageSent", "responseReceived"];
+  const allowedUpdates = ["status", "passCheck", "phoneNumber", "messageSent", "responseReceived"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );

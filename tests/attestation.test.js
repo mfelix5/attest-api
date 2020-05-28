@@ -131,13 +131,13 @@ test("Should update valid attestation fields", async () => {
     .patch(`/attestations/${attestationTwo._id}`)
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
-      healthy: true,
+      passCheck: true,
       responseReceived: now
     })
     .expect(200);
   const attestation = await Attestation.findById(attestationTwo._id);
   expect(moment(attestation.responseReceived).format()).toEqual(moment(now).format());
-  expect(attestation.healthy).toEqual(true);
+  expect(attestation.passCheck).toEqual(true);
 });
 
 test("Should not update invalid attestation fields", async () => {

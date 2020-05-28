@@ -3,6 +3,7 @@ const twilio = require("twilio");
 const Account = require("../models/account");
 const Attestation = require("../models/attestation");
 const Person = require("../models/person");
+const { wellnessCheck } = require("../messages/constants");
 
 let twilioClient;
 
@@ -20,7 +21,7 @@ const sendMessage = async attestation => {
   const options = {
     to: `+1${attestation.phoneNumber}`,
     from: process.env.TWILIO_PHONE_NUMBER,
-    body: attestation.message,
+    body: `${wellnessCheck}`,
   };
 
   try {
@@ -98,9 +99,27 @@ const sendMessagesToPeopleThatMustAttest = async currentTime => {
   }
 }
 
+const updateAttestationDocument = async (reply, phoneNumber) => {
+  const today = moment().startOf("day");
+  // if phone number begins with +1, strip it
+  const updated = await Attestation.findOneAndUpdate(
+    {
+      messageSent: { $gte: today },
+      phoneNumber,
+    },
+    {
+      passCheck: reply === "no",
+      responseReceived: new Date(),
+    },
+    { new: true }
+  );
+  return updated;
+};
+
 module.exports = {
   createAttestations,
   getAccountsThatAreDue,
   getPersonsOnAccounts,
   sendMessagesToPeopleThatMustAttest,
+  updateAttestationDocument
 };

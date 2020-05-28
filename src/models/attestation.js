@@ -15,7 +15,7 @@ const attestationSchema = new mongoose.Schema(
     phoneNumber: { type: String, required: true },
     messageSent: { type: Date, required: true },
     responseReceived: { type: Date },
-    healthy: { type: Boolean },
+    passCheck: { type: Boolean },
   },
   {
     timestamps: true,
