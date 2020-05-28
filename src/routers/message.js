@@ -7,25 +7,27 @@ const {
   appResponseToYes,
   appResponseToNo,
   appResponseToBadText,
-  appUnableToDetermineSender
+  appResponseToUnexpectedMessage
 } = require("../messages/constants");
 
 router.post(
   "/reply",
   express.urlencoded({ extended: true }),
   async (req, res) => {
-    let appReply = appUnableToDetermineSender;
+    let appReply = appResponseToUnexpectedMessage;
     const message = _.get(req, "body.Body");
     const phone = _.get(req, "body.From");
 
     if (message && phone) {
       if (message.toLowerCase() === "yes") {
-        await updateAttestationDocument("yes", phone);
-        appReply = appResponseToYes;
+        const updated = await updateAttestationDocument("yes", phone);
+        if (updated) appReply = appResponseToYes;
       } else if (message.toLowerCase() === "no") {
-        await updateAttestationDocument("no", phone);
-        // sendAlertToAdmin(phone);
-        appReply = appResponseToNo;
+        const updated = await updateAttestationDocument("no", phone);
+        if (updated) {
+          appReply = appResponseToNo;
+          // sendAlertToAdmin(phone);
+        }
       } else {
         appReply = appResponseToBadText;
       }
