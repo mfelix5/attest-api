@@ -2,12 +2,6 @@ const mongoose = require("mongoose");
 
 const attestationSchema = new mongoose.Schema(
   {
-    status: {
-      type: "String",
-      enum: ["sent", "received"],
-      required: true,
-      default: "sent"
-    },
     accountId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -19,19 +13,8 @@ const attestationSchema = new mongoose.Schema(
       ref: "Person",
     },
     phoneNumber: { type: String, required: true },
-    message: {
-      type: {
-        text: { type: String },
-        date: { type: Date },
-      },
-      required: true
-    },
-    response: {
-      type: {
-        text: { type: String },
-        date: { type: Date },
-      },
-    },
+    messageSent: { type: Date, required: true },
+    responseReceived: { type: Date },
     healthy: { type: Boolean },
   },
   {

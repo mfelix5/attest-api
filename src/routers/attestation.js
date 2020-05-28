@@ -18,7 +18,7 @@ router.post("/attestations", auth, async (req, res) => {
   }
 });
 
-// GET /attestations?status=sent
+// GET /attestations?status=responseReceived
 // GET /attestations?limit=10&skip=20
 // GET /attestations?sortBy=createdAt:desc
 router.get("/attestations", auth, async (req, res) => {
@@ -26,7 +26,11 @@ router.get("/attestations", auth, async (req, res) => {
   const sort = {};
 
   if (req.query.status) {
-    match.status = req.query.status;
+    if (req.query.status === "responseReceived") {
+      match.responseReceived = { $exists: true };
+    } else if (req.query.status === "messageSent") {
+      match.responseReceived = { $exists: false };
+    }
   }
 
   if (req.query.sortBy) {
@@ -70,7 +74,7 @@ router.get("/attestations/:id", auth, async (req, res) => {
 
 router.patch("/attestations/:id", auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["status", "healthy", "phoneNumber", "message", "response"];
+  const allowedUpdates = ["status", "healthy", "phoneNumber", "messageSent", "responseReceived"];
   const isValidOperation = updates.every((update) =>
     allowedUpdates.includes(update)
   );

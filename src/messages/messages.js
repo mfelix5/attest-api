@@ -67,7 +67,7 @@ const createAttestations = async persons => {
       accountId: person.accountId,
       personId: person._id,
       phoneNumber: person.primaryPhone,
-      message: `Hi ${person.firstName} ${person.lastName}. Are you Ok?`
+      messageSent: new Date()
     }).save();
   });
   const attestations = [].concat(...(await Promise.all(attestationPromises)));

@@ -87,50 +87,34 @@ const personFour = {
 
 const attestationOne = {
   _id: new mongoose.Types.ObjectId(),
-  status: "sent",
   personId: personOne._id,
   accountId: personOne.accountId,
   phoneNumber: personOne.primaryPhone,
-  message: {
-    text: "Hi there",
-    date: Date.now()
-  }
+  messageSent: new Date()
 };
 
 const attestationTwo = {
   _id: new mongoose.Types.ObjectId(),
-  status: "sent",
   personId: personTwo._id,
   accountId: personTwo.accountId,
   phoneNumber: personTwo.primaryPhone,
-  message: {
-    text: "Hi there",
-    date: Date.now()
-  }
+  messageSent: new Date()
 };
 
 const attestationThree = {
   _id: new mongoose.Types.ObjectId(),
-  status: "sent",
   personId: personThree._id,
   accountId: personThree.accountId,
   phoneNumber: personThree.primaryPhone,
-  message: {
-    text: "Hi there",
-    date: Date.now()
-  }
+  messageSent: new Date()
 };
 
 const attestationFour = {
   _id: new mongoose.Types.ObjectId(),
-  status: "sent",
   personId: personFour._id,
   accountId: personFour.accountId,
   phoneNumber: personFour.primaryPhone,
-  message: {
-    text: "Hi there",
-    date: Date.now()
-  }
+  messageSent: new Date()
 };
 
 const setupDatabase = async () => {

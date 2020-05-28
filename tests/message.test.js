@@ -60,6 +60,6 @@ test("Should create attestations", async () => {
     expect(a).toHaveProperty("accountId")
     expect(a).toHaveProperty("personId")
     expect(a).toHaveProperty("phoneNumber")
-    expect(a).toHaveProperty("message")
+    expect(a).toHaveProperty("messageSent")
   });
 });

@@ -1,5 +1,6 @@
 const request = require("supertest");
 const app = require("../src/app");
+const moment = require("moment");
 const Attestation = require("../src/models/attestation");
 const {
   attestationOne,
@@ -22,13 +23,9 @@ test("Should create an attestation with the user's accountId", async () => {
     .post("/attestations")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
-      status: "sent",
       personId: personOne._id,
       phoneNumber: "1234567890",
-      message: {
-        text: "Hi there",
-        date: Date.now()
-      },
+      messageSent: new Date(),
     })
     .expect(201);
 
@@ -53,18 +50,32 @@ test("Should only fetch attestations that belong to a user's account", async () 
 });
 
 test("Should filter attestations by status", async () => {
-  const response = await request(app)
-    .get("/attestations?status=sent")
+  // set up test with attestation that has received response
+  const newAttestation = await new Attestation({
+    personId: personOne._id,
+    accountId: personOne.accountId,
+    phoneNumber: personOne.primaryPhone,
+    messageSent: new Date(),
+    responseReceived: new Date()
+  }).save();
+
+  const response1 = await request(app)
+    .get("/attestations?status=messageSent")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
 
-  const sentAttestations = response.body;
+  const sentAttestations = response1.body;
   expect(sentAttestations).toHaveLength(2);
-  expect(sentAttestations.every((attestation) => attestation.status === "sent")).toBe(true);
 
-  //TODO: Add seed data and test for status received
+  const response2 = await request(app)
+    .get("/attestations?status=responseReceived")
+    .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
+    .send()
+    .expect(200);
 
+  const receivedAttestations = response2.body;
+  expect(receivedAttestations).toHaveLength(1);
 });
 
 test("Should limit and paginate attestations", async () => {
@@ -115,16 +126,17 @@ test("Should not delete attestations from other accounts", async () => {
 });
 
 test("Should update valid attestation fields", async () => {
+  const now = Date.now()
   await request(app)
     .patch(`/attestations/${attestationTwo._id}`)
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
       healthy: true,
-      status: "received"
+      responseReceived: now
     })
     .expect(200);
   const attestation = await Attestation.findById(attestationTwo._id);
-  expect(attestation.status).toEqual("received");
+  expect(moment(attestation.responseReceived).format()).toEqual(moment(now).format());
   expect(attestation.healthy).toEqual(true);
 });
 
