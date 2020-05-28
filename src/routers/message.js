@@ -21,13 +21,13 @@ router.post(
     if (message && phone) {
       if (message.toLowerCase() === "yes") {
         const updated = await updateAttestationDocument("yes", phone);
-        if (updated) appReply = appResponseToYes;
-      } else if (message.toLowerCase() === "no") {
-        const updated = await updateAttestationDocument("no", phone);
         if (updated) {
-          appReply = appResponseToNo;
+          appReply = appResponseToYes;
           notifyAdmins(phone);
         }
+      } else if (message.toLowerCase() === "no") {
+        const updated = await updateAttestationDocument("no", phone);
+        if (updated) appReply = appResponseToNo;
       } else {
         appReply = appResponseToBadText;
       }
