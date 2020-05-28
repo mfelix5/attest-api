@@ -1,19 +1,19 @@
 const mongoose = require("mongoose");
 
-const phoneSchema = new mongoose.Schema({
-  number: {
-    type: String,
-    required: true,
-    maxlength: 10,
-    minlength: 10,
-  },
-  isOwnPhone: { type: Boolean, default: true, required: true },
-  owner: { type: String },
-  ownerRelationship: {
-    type: String,
-    enum: ["parent", "guardian", "partner", "child", "caregiver"],
-  },
-});
+// const phoneSchema = new mongoose.Schema({
+//   number: {
+//     type: String,
+//     required: true,
+//     maxlength: 10,
+//     minlength: 10,
+//   },
+//   isOwnPhone: { type: Boolean, default: true, required: true },
+//   owner: { type: String },
+//   ownerRelationship: {
+//     type: String,
+//     enum: ["parent", "guardian", "partner", "child", "caregiver"],
+//   },
+// });
 
 const personSchema = new mongoose.Schema(
   {
@@ -41,7 +41,7 @@ const personSchema = new mongoose.Schema(
       default: true
     },
     primaryPhone: { type: String, required: true },
-    phoneNumbers: [phoneSchema], // not used yet
+    // phoneNumbers: [phoneSchema], // not used yet
   },
   {
     timestamps: true

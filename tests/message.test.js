@@ -46,7 +46,7 @@ test("Should get active persons on accounts", async () => {
   const personsTest1 = await getPersonsOnAccounts([accountOne._id, accountTwo._id]);
   expect(personsTest1).toHaveLength(3);
   const ids = personsTest1.map(p => p._id);
-  expect([personOne, personTwo, personThree].map(p => p._id)).toEqual(ids);
+  expect([personOne, personTwo, personThree].map(p => p._id).sort()).toEqual(ids.sort());
 
   const personsTest2 = await getPersonsOnAccounts([accountTwo._id]);
   expect(personsTest2).toHaveLength(1);

@@ -58,10 +58,6 @@ const personOne = {
   otherId: "123ABC",
   accountId: userOne.accountId,
   primaryPhone: "1234567890",
-  phoneNumbers: [{
-    number: "1231231234",
-    isOwnPhone: true
-  }]
 };
 
 const personTwo = {
@@ -70,20 +66,6 @@ const personTwo = {
   lastName: "Person",
   accountId: userOne.accountId,
   primaryPhone: "1234567899",
-  phoneNumbers: [
-  {
-    number: "1231231234",
-    isOwnPhone: false,
-    owner: "My Mother",
-    ownerRelationship: "parent"
-  },
-  {
-    number: "1231231245",
-    isOwnPhone: false,
-    owner: "My Father",
-    ownerRelationship: "parent"
-  },
-]
 };
 
 const personThree = {
@@ -92,10 +74,6 @@ const personThree = {
   lastName: "Person",
   accountId: userTwo.accountId,
   primaryPhone: "1234567890",
-  phoneNumbers: [{
-    number: "2131231234",
-    isOwnPhone: true
-  }]
 };
 
 const personFour = {
@@ -105,10 +83,6 @@ const personFour = {
   lastName: "Person",
   accountId: userTwo.accountId,
   primaryPhone: "1234567890",
-  phoneNumbers: [{
-    number: "1531231234",
-    isOwnPhone: true
-  }]
 };
 
 const attestationOne = {

@@ -76,7 +76,7 @@ test("Should limit and paginate attestations", async () => {
   expect(response1.body).toHaveLength(2);
 
   const response2 = await request(app)
-    .get("/attestations?limit=1")
+    .get("/attestations?limit=1&sortBy=personId:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
@@ -86,7 +86,7 @@ test("Should limit and paginate attestations", async () => {
   expect(attestation._id).toEqual(attestationThree._id.toString());
 
   const response3 = await request(app)
-    .get("/attestations?limit=1&skip=1")
+    .get("/attestations?limit=1&skip=1&sortBy=personId:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
