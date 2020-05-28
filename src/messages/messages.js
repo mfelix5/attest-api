@@ -3,7 +3,8 @@ const twilio = require("twilio");
 const Account = require("../models/account");
 const Attestation = require("../models/attestation");
 const Person = require("../models/person");
-const { wellnessCheck } = require("../messages/constants");
+const User = require("../models/user");
+const { appNotificationToAdmin, wellnessCheck } = require("../messages/constants");
 
 let twilioClient;
 
@@ -17,11 +18,11 @@ if (process.env.NODE_ENV === "prod") {
 /**
  * Sends an SMS to the specified phone number in an attestation
  */
-const sendMessage = async attestation => {
+const sendMessage = async (phoneNumber, message) => {
   const options = {
-    to: `+1${attestation.phoneNumber}`,
+    to: `+1${phoneNumber}`,
     from: process.env.TWILIO_PHONE_NUMBER,
-    body: `${wellnessCheck}`,
+    body: message,
   };
 
   try {
@@ -83,7 +84,9 @@ const sendMessagesToPeopleThatMustAttest = async currentTime => {
 
     // send SMS
     console.log(`Sending ${attestations.length} messages`);
-    attestations.forEach((attestation) => sendMessage(attestation));
+    attestations.forEach((attestation) => {
+      sendMessage(attestation.phoneNumber, wellnessCheck)
+    });
 
     // update lastSent on each account
     const accountsToUpdate = [...new Set(persons.map(p => p.accountId))];
@@ -101,7 +104,7 @@ const sendMessagesToPeopleThatMustAttest = async currentTime => {
 
 const updateAttestationDocument = async (reply, phoneNumber) => {
   const today = moment().startOf("day");
-  // if phone number begins with +1, strip it
+  // TODO: if phone number begins with +1, strip it
   const updated = await Attestation.findOneAndUpdate(
     {
       messageSent: { $gte: today },
@@ -116,10 +119,23 @@ const updateAttestationDocument = async (reply, phoneNumber) => {
   return updated;
 };
 
+const notifyAdmins = async (phoneNumber) => {
+  const personOfConcern = await Person.findOne({ phoneNumber });
+  const relatedAdmins = await User.find({
+    accountId: personOfConcern.accountId,
+    isAdmin: true
+  });
+  const message = `${personOfConcern.firstName} ${personOfConcern.lastName} ${appNotificationToAdmin}`;
+  relatedAdmins.forEach(admin => {
+    sendMessage(admin.phoneNumber, message);
+  });
+}
+
 module.exports = {
   createAttestations,
   getAccountsThatAreDue,
   getPersonsOnAccounts,
+  notifyAdmins,
   sendMessagesToPeopleThatMustAttest,
   updateAttestationDocument
 };

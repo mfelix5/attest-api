@@ -18,6 +18,7 @@ test("Should signup a new user", async () => {
       email: "andrew@example.com",
       password: "MyPass777!",
       accountId: accountOneId,
+      phoneNumber: "1231235446"
     })
     .expect(201);
 

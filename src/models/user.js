@@ -53,7 +53,11 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: 'Account'
-  }
+    },
+    phoneNumber: {
+      type: String,
+      required: true
+    }
   },
   {
     timestamps: true,

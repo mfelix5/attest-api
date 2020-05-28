@@ -2,7 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const _ = require("lodash");
 const MessagingResponse = require("twilio").twiml.MessagingResponse;
-const { updateAttestationDocument } = require("../messages/messages");
+const { notifyAdmins, updateAttestationDocument } = require("../messages/messages");
 const {
   appResponseToYes,
   appResponseToNo,
@@ -26,7 +26,7 @@ router.post(
         const updated = await updateAttestationDocument("no", phone);
         if (updated) {
           appReply = appResponseToNo;
-          // sendAlertToAdmin(phone);
+          notifyAdmins(phone);
         }
       } else {
         appReply = appResponseToBadText;

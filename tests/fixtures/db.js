@@ -35,6 +35,7 @@ const userOne = {
     },
   ],
   accountId: accountOne._id,
+  phoneNumber: "8455551212"
 };
 
 const userTwoId = new mongoose.Types.ObjectId();
@@ -49,6 +50,7 @@ const userTwo = {
     },
   ],
   accountId: accountTwo._id,
+  phoneNumber: "8025551212"
 };
 
 const personOne = {
