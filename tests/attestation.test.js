@@ -2,6 +2,10 @@ const request = require("supertest");
 const app = require("../src/app");
 const Attestation = require("../src/models/attestation");
 const {
+  attestationOne,
+  attestationTwo,
+  attestationThree,
+  attestationFour,
   personOne,
   personTwo,
   personThree,
@@ -63,84 +67,70 @@ test("Should filter attestations by status", async () => {
 
 });
 
-xtest("Should limit and paginate attestations", async () => {
+test("Should limit and paginate attestations", async () => {
   const response1 = await request(app)
-    .get("/persons?limit=0")
+    .get("/attestations?limit=0")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response1.body).toHaveLength(2);
 
   const response2 = await request(app)
-    .get("/persons?limit=1")
+    .get("/attestations?limit=1")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response2.body).toHaveLength(1);
-  const person = response2.body[0];
-  expect(person._id).toEqual(personThree._id.toString());
+
+  const attestation = response2.body[0];
+  expect(attestation._id).toEqual(attestationThree._id.toString());
 
   const response3 = await request(app)
-    .get("/persons?limit=1&skip=1")
+    .get("/attestations?limit=1&skip=1")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response3.body).toHaveLength(1);
-  const returnedPerson = response3.body[0];
-  expect(returnedPerson._id).toEqual(personFour._id.toString());
+  const returnedAttestation = response3.body[0];
+  expect(returnedAttestation._id).toEqual(attestationFour._id.toString());
 });
 
-xtest("Should sort attestations", async () => {
-  const response1 = await request(app)
-    .get("/persons?sortBy=firstName:asc")
-    .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
-    .send()
-    .expect(200);
+// xtest("Should sort attestations", async () => {
+//   const response1 = await request(app)
+//     .get("/attestations?sortBy=createdAt:asc")
+//     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
+//     .send()
+//     .expect(200);
+// });
 
-  expect(response1.body).toHaveLength(2);
-  const firstNames = response1.body.map(person => person.firstName);
-  expect(firstNames).toEqual(["Fourth", "Third"])
-
-  const response2 = await request(app)
-    .get("/persons?sortBy=firstName:desc")
-    .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
-    .send()
-    .expect(200);
-
-  expect(response2.body).toHaveLength(2);
-  const firstNameArray = response2.body.map(person => person.firstName);
-  expect(firstNameArray).toEqual(["Third", "Fourth"])
-
-});
-
-xtest("Should not delete attestations from other accounts", async () => {
+test("Should not delete attestations from other accounts", async () => {
   await request(app)
-    .delete(`/persons/${personOne._id}`)
+    .delete(`/attestations/${attestationOne._id}`)
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(404);
 
-  const person = await Person.findById(personOne._id);
-  expect(person).not.toBeNull();
+  const attestation = await Attestation.findById(attestationOne._id);
+  expect(attestation).not.toBeNull();
 });
 
-xtest("Should update valid attestation fields", async () => {
+test("Should update valid attestation fields", async () => {
   await request(app)
-    .patch(`/persons/${personTwo._id}`)
+    .patch(`/attestations/${attestationTwo._id}`)
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
-      firstName: "Jess",
-      active: false
+      healthy: true,
+      status: "received"
     })
     .expect(200);
-  const person = await Person.findById(personTwo._id);
-  expect(person.firstName).toEqual("Jess");
-  expect(person.active).toEqual(false);
+  const attestation = await Attestation.findById(attestationTwo._id);
+  expect(attestation.status).toEqual("received");
+  expect(attestation.healthy).toEqual(true);
 });
 
-xtest("Should not update invalid attestation fields", async () => {
+test("Should not update invalid attestation fields", async () => {
   await request(app)
-  .patch(`/persons/${personThree._id}`)
+  .patch(`/attestations/${attestationOne._id}`)
   .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
   .send({
     badProperty: "Test",

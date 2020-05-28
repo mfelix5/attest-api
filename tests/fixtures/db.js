@@ -112,6 +112,7 @@ const personFour = {
 };
 
 const attestationOne = {
+  _id: new mongoose.Types.ObjectId(),
   status: "sent",
   personId: personOne._id,
   accountId: personOne.accountId,
@@ -123,6 +124,7 @@ const attestationOne = {
 };
 
 const attestationTwo = {
+  _id: new mongoose.Types.ObjectId(),
   status: "sent",
   personId: personTwo._id,
   accountId: personTwo.accountId,
@@ -134,6 +136,7 @@ const attestationTwo = {
 };
 
 const attestationThree = {
+  _id: new mongoose.Types.ObjectId(),
   status: "sent",
   personId: personThree._id,
   accountId: personThree.accountId,
@@ -145,6 +148,7 @@ const attestationThree = {
 };
 
 const attestationFour = {
+  _id: new mongoose.Types.ObjectId(),
   status: "sent",
   personId: personFour._id,
   accountId: personFour.accountId,
@@ -156,33 +160,37 @@ const attestationFour = {
 };
 
 const setupDatabase = async () => {
-  await Promise.all([
-    Account.deleteMany(),
-    User.deleteMany(),
-    Person.deleteMany(),
-    Attestation.deleteMany()
-  ]);
+  try {
+    await Promise.all([
+      Account.deleteMany(),
+      User.deleteMany(),
+      Person.deleteMany(),
+      Attestation.deleteMany()
+    ]);
 
-  await Promise.all([
-    new Account(accountOne).save(),
-    new Account(accountTwo).save(),
-  ]);
+    await Promise.all([
+      new Account(accountOne).save(),
+      new Account(accountTwo).save(),
+    ]);
 
-  await Promise.all([new User(userOne).save(), new User(userTwo).save()]);
+    await Promise.all([new User(userOne).save(), new User(userTwo).save()]);
 
-  await Promise.all([
-    new Person(personOne).save(),
-    new Person(personTwo).save(),
-    new Person(personThree).save(),
-    new Person(personFour).save()
-  ]);
+    await Promise.all([
+      new Person(personOne).save(),
+      new Person(personTwo).save(),
+      new Person(personThree).save(),
+      new Person(personFour).save()
+    ]);
 
-  await Promise.all([
-    new Attestation(attestationOne).save(),
-    new Attestation(attestationTwo).save(),
-    new Attestation(attestationThree).save(),
-    new Attestation(attestationFour).save(),
-  ]);
+    await Promise.all([
+      new Attestation(attestationOne).save(),
+      new Attestation(attestationTwo).save(),
+      new Attestation(attestationThree).save(),
+      new Attestation(attestationFour).save(),
+    ]);
+  } catch (e) {
+    console.log("Error in setupDatabase():", e);
+  }
 };
 
 module.exports = {
@@ -190,6 +198,10 @@ module.exports = {
   accountOne,
   accountTwoId,
   accountTwo,
+  attestationOne,
+  attestationTwo,
+  attestationThree,
+  attestationFour,
   userOneId,
   userOne,
   userTwoId,
