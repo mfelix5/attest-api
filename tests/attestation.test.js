@@ -27,14 +27,15 @@ test("Should create an attestation with the user's accountId", async () => {
       },
     })
     .expect(201);
+
   const attestation = await Attestation.findById(response.body._id);
   expect(attestation).not.toBeNull();
   expect(attestation.accountId).toEqual(userOne.accountId);
 });
 
-xtest("Should only fetch attestations that belong to a user's account", async () => {
+test("Should only fetch attestations that belong to a user's account", async () => {
   const response = await request(app)
-    .get("/persons")
+    .get("/attestations")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
@@ -42,41 +43,27 @@ xtest("Should only fetch attestations that belong to a user's account", async ()
   expect(response.body.length).toEqual(2);
   expect(
     response.body.every(
-      (person) => person.accountId === userOne.accountId.toString()
+      (attestation) => attestation.accountId === userOne.accountId.toString()
     )
   ).toBe(true);
 });
 
-xtest("Should filter persons that are active or inactive", async () => {
+test("Should filter attestations by status", async () => {
   const response = await request(app)
-    .get("/persons?active=true")
+    .get("/attestations?status=sent")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
 
-  const activePersons = response.body;
-  expect(activePersons).toHaveLength(2);
+  const sentAttestations = response.body;
+  expect(sentAttestations).toHaveLength(2);
+  expect(sentAttestations.every((attestation) => attestation.status === "sent")).toBe(true);
 
-  const response2 = await request(app)
-    .get("/persons?active=false")
-    .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
-    .send()
-    .expect(200);
+  //TODO: Add seed data and test for status received
 
-  const inactivePersons = response2.body;
-  expect(inactivePersons).toHaveLength(0);
-
-  const response3 = await request(app)
-    .get("/persons?active=true")
-    .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
-    .send()
-    .expect(200);
-
-  const activePersonsAccount2 = response3.body;
-  expect(activePersonsAccount2).toHaveLength(1);
 });
 
-xtest("Should limit and paginate persons that are fetched", async () => {
+xtest("Should limit and paginate attestations", async () => {
   const response1 = await request(app)
     .get("/persons?limit=0")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
@@ -103,7 +90,7 @@ xtest("Should limit and paginate persons that are fetched", async () => {
   expect(returnedPerson._id).toEqual(personFour._id.toString());
 });
 
-xtest("Should sort persons that are fetched", async () => {
+xtest("Should sort attestations", async () => {
   const response1 = await request(app)
     .get("/persons?sortBy=firstName:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
@@ -126,7 +113,7 @@ xtest("Should sort persons that are fetched", async () => {
 
 });
 
-xtest("Should not delete persons of concern from other accounts", async () => {
+xtest("Should not delete attestations from other accounts", async () => {
   await request(app)
     .delete(`/persons/${personOne._id}`)
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
@@ -137,7 +124,7 @@ xtest("Should not delete persons of concern from other accounts", async () => {
   expect(person).not.toBeNull();
 });
 
-xtest("Should update valid person fields", async () => {
+xtest("Should update valid attestation fields", async () => {
   await request(app)
     .patch(`/persons/${personTwo._id}`)
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
@@ -151,7 +138,7 @@ xtest("Should update valid person fields", async () => {
   expect(person.active).toEqual(false);
 });
 
-xtest("Should not update invalid person fields", async () => {
+xtest("Should not update invalid attestation fields", async () => {
   await request(app)
   .patch(`/persons/${personThree._id}`)
   .set("Authorization", `Bearer ${userOne.tokens[0].token}`)

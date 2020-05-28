@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const Account = require("../../src/models/account");
+const Attestation = require("../../src/models/attestation");
 const User = require("../../src/models/user");
 const Person = require("../../src/models/person");
 
@@ -110,11 +111,56 @@ const personFour = {
   }]
 };
 
+const attestationOne = {
+  status: "sent",
+  personId: personOne._id,
+  accountId: personOne.accountId,
+  phoneNumber: personOne.primaryPhone,
+  message: {
+    text: "Hi there",
+    date: Date.now()
+  }
+};
+
+const attestationTwo = {
+  status: "sent",
+  personId: personTwo._id,
+  accountId: personTwo.accountId,
+  phoneNumber: personTwo.primaryPhone,
+  message: {
+    text: "Hi there",
+    date: Date.now()
+  }
+};
+
+const attestationThree = {
+  status: "sent",
+  personId: personThree._id,
+  accountId: personThree.accountId,
+  phoneNumber: personThree.primaryPhone,
+  message: {
+    text: "Hi there",
+    date: Date.now()
+  }
+};
+
+const attestationFour = {
+  status: "sent",
+  personId: personFour._id,
+  accountId: personFour.accountId,
+  phoneNumber: personFour.primaryPhone,
+  message: {
+    text: "Hi there",
+    date: Date.now()
+  }
+};
+
 const setupDatabase = async () => {
   await Promise.all([
     Account.deleteMany(),
     User.deleteMany(),
     Person.deleteMany(),
+    Attestation.deleteMany()
   ]);
 
   await Promise.all([
@@ -129,6 +175,13 @@ const setupDatabase = async () => {
     new Person(personTwo).save(),
     new Person(personThree).save(),
     new Person(personFour).save()
+  ]);
+
+  await Promise.all([
+    new Attestation(attestationOne).save(),
+    new Attestation(attestationTwo).save(),
+    new Attestation(attestationThree).save(),
+    new Attestation(attestationFour).save(),
   ]);
 };
 

@@ -78,7 +78,7 @@ test("Should filter persons that are active or inactive", async () => {
   expect(activePersonsAccount2).toHaveLength(1);
 });
 
-test("Should limit and paginate persons that are fetched", async () => {
+test("Should limit and paginate persons", async () => {
   const response1 = await request(app)
     .get("/persons?limit=0")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
@@ -105,7 +105,7 @@ test("Should limit and paginate persons that are fetched", async () => {
   expect(returnedPerson._id).toEqual(personFour._id.toString());
 });
 
-test("Should sort persons that are fetched", async () => {
+test("Should sort persons", async () => {
   const response1 = await request(app)
     .get("/persons?sortBy=firstName:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)

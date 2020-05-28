@@ -18,15 +18,15 @@ router.post("/attestations", auth, async (req, res) => {
   }
 });
 
-// GET /attestations?active=true
+// GET /attestations?status=sent
 // GET /attestations?limit=10&skip=20
 // GET /attestations?sortBy=createdAt:desc
 router.get("/attestations", auth, async (req, res) => {
   const match = {};
   const sort = {};
 
-  if (req.query.active) {
-    match.active = req.query.active === "true";
+  if (req.query.status) {
+    match.status = req.query.status;
   }
 
   if (req.query.sortBy) {
