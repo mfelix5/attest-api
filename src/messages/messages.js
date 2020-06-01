@@ -59,15 +59,42 @@ const getPersonsOnAccounts = async (accountIds) => {
   return [].concat(...(await Promise.all(personPromises)));
 };
 
+const createOrUpdateAttestation = async (data, accountId) => {
+  const { personId, phoneNumber, messageSent, responseReceived, passCheck } = data;
+  const exists = await Attestation.findOne({
+    personId,
+    messageSent: { $gte: moment(messageSent).startOf("day") },
+  });
+
+  if (exists) {
+    // update
+    return await Attestation.findOneAndUpdate({
+      _id: exists._id
+    }, {
+      phoneNumber,
+      messageSent,
+      responseReceived,
+      passCheck
+    });
+  } else {
+    //create
+    const attestation = new Attestation({
+      ...data,
+      accountId,
+    });
+    return await attestation.save();
+  }
+}
+
 const createAttestations = async (persons) => {
   const today = moment().startOf("day");
   const attestationPromises = persons.map((person) => {
-    return new Attestation({
-      accountId: person.accountId,
+    const attestationData = {
       personId: person._id,
       phoneNumber: person.primaryPhone,
       messageSent: new Date()
-    }).save();
+    }
+    return createOrUpdateAttestation(attestationData, person.accountId)
   });
   const attestations = [].concat(...(await Promise.all(attestationPromises)));
   return attestations;
@@ -136,6 +163,7 @@ const notifyAdmins = async (phoneNumber) => {
 
 module.exports = {
   createAttestations,
+  createOrUpdateAttestation,
   getAccountsThatAreDue,
   getPersonsOnAccounts,
   notifyAdmins,

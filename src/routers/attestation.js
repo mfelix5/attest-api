@@ -1,19 +1,19 @@
 const express = require("express");
 const Attestation = require("../models/attestation");
 const auth = require("../middleware/auth");
+const { createOrUpdateAttestation } = require("../messages/messages");
 const router = new express.Router();
 
 router.post("/attestations", auth, async (req, res) => {
-  const attestation = new Attestation({
-    ...req.body,
-    accountId: req.user.accountId,
-  });
-
   try {
-    await attestation.save();
+    if (!req.body.personId || !req.body.messageSent) {
+      return res.status(400).send({ error: "personId and messageSent are required." });
+    }
+    const attestation = await createOrUpdateAttestation(req.body, req.user.accountId);
     res.status(201).send(attestation);
+
   } catch (e) {
-    console.log('e', e)
+    console.log("e", e);
     res.status(400).send(e);
   }
 });

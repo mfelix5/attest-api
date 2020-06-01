@@ -149,3 +149,43 @@ test("Should not update invalid attestation fields", async () => {
   })
   .expect(400);
 });
+
+test("Should not create more than one attestation for a person on one day", async () => {
+  const today = moment().startOf("day");
+  const thisMorning = today.add(1, "hour");
+  const firstResponse = await request(app)
+    .post("/attestations")
+    .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
+    .send({
+      personId: userTwo._id,
+      phoneNumber: "1234567890",
+      messageSent: today,
+    })
+    .expect(201);
+
+  const attestation = await Attestation.findById(firstResponse.body._id);
+  expect(attestation).not.toBeNull();
+
+  await request(app)
+    .post("/attestations")
+    .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
+    .send({
+      personId: userTwo._id,
+      phoneNumber: "1234567891",
+      messageSent: thisMorning,
+      passCheck: false
+    })
+    .expect(201);
+
+  const found = await Attestation.find({
+    personId: userTwo._id,
+    createdAt: { $gte: today },
+    messageSent: { $gte: today },
+  });
+
+  expect(found).toHaveLength(1);
+  expect(found[0]._id.toString()).toEqual(firstResponse.body._id);
+  expect(found[0].phoneNumber).toEqual("1234567891");
+  expect(found[0].passCheck).toEqual(false);
+  expect(moment(found[0].messageSent).format()).toEqual(thisMorning.format());
+});
