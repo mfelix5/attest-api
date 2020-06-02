@@ -119,7 +119,41 @@ const checkFour = {
   messageSent: new Date()
 };
 
-const setupDatabase = async () => {
+const healthyEmployee = {
+  _id: new mongoose.Types.ObjectId(),
+  firstName: "Test",
+  lastName: "Healthy",
+  accountId: accountOne._id,
+  primaryPhone: "1234567899",
+};
+
+const healthyCheck = {
+  _id: new mongoose.Types.ObjectId(),
+  employeeId: healthyEmployee._id,
+  accountId: healthyEmployee.accountId,
+  phoneNumber: healthyEmployee.primaryPhone,
+  messageSent: new Date(),
+  passCheck: true
+};
+
+const unhealthyEmployee = {
+  _id: new mongoose.Types.ObjectId(),
+  firstName: "Test",
+  lastName: "Unhealthy",
+  accountId: accountOne._id,
+  primaryPhone: "1234567899",
+};
+
+const unhealthyCheck = {
+  _id: new mongoose.Types.ObjectId(),
+  employeeId: unhealthyEmployee._id,
+  accountId: unhealthyEmployee.accountId,
+  phoneNumber: unhealthyEmployee.primaryPhone,
+  messageSent: new Date(),
+  passCheck: false
+};
+
+const setupDatabaseWithAccountsUsersEmployees = async () => {
   try {
     await Promise.all([
       Account.deleteMany(),
@@ -142,16 +176,28 @@ const setupDatabase = async () => {
       new Employee(employeeFour).save()
     ]);
 
-    await Promise.all([
-      new Check(checkOne).save(),
-      new Check(checkTwo).save(),
-      new Check(checkThree).save(),
-      new Check(checkFour).save(),
-    ]);
   } catch (e) {
-    console.log("Error in setupDatabase():", e);
+    console.log("Error in setupDatabaseWithAccountsUsersEmployees():", e);
   }
 };
+
+const setupDatabaseWithChecks = async () => {
+  // add healthy employee and check, unhealthy employee and check to account one
+
+  await Promise.all([
+    new Employee(healthyEmployee).save(),
+    new Employee(unhealthyEmployee).save()
+  ]);
+
+  await Promise.all([
+    new Check(checkOne).save(),
+    new Check(checkTwo).save(),
+    new Check(checkThree).save(),
+    new Check(checkFour).save(),
+    new Check(healthyCheck).save(),
+    new Check(unhealthyCheck).save()
+  ]);
+}
 
 module.exports = {
   accountOneId,
@@ -162,13 +208,18 @@ module.exports = {
   checkTwo,
   checkThree,
   checkFour,
-  userOneId,
-  userOne,
-  userTwoId,
-  userTwo,
   employeeOne,
   employeeTwo,
   employeeThree,
   employeeFour,
-  setupDatabase,
+  healthyCheck,
+  healthyEmployee,
+  setupDatabaseWithAccountsUsersEmployees,
+  setupDatabaseWithChecks,
+  unhealthyCheck,
+  unhealthyEmployee,
+  userOneId,
+  userOne,
+  userTwoId,
+  userTwo,
 };

@@ -1,6 +1,6 @@
-const moment = require("moment");
 const request = require("supertest");
 const app = require("../src/app");
+const moment = require("moment");
 const Check = require("../src/models/check");
 const {
   createChecks,
@@ -15,10 +15,10 @@ const {
   employeeTwo,
   employeeThree,
   userOne,
-  setupDatabase,
+  setupDatabaseWithAccountsUsersEmployees,
 } = require("./fixtures/db");
 
-beforeEach(setupDatabase);
+beforeEach(setupDatabaseWithAccountsUsersEmployees);
 
 test("Should get active accounts including account that has never sent messages", async () => {
   const currentTime = new Date();

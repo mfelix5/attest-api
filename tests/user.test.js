@@ -5,10 +5,10 @@ const {
   accountOneId,
   userOneId,
   userOne,
-  setupDatabase,
+  setupDatabaseWithAccountsUsersEmployees,
 } = require("./fixtures/db");
 
-beforeEach(setupDatabase);
+beforeEach(setupDatabaseWithAccountsUsersEmployees);
 
 test("Should signup a new user", async () => {
   const response = await request(app)
