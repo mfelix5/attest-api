@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Person = require("./person");
+const Employee = require("./employee");
 
 const userSchema = new mongoose.Schema(
   {
@@ -64,8 +64,8 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-userSchema.virtual("persons", {
-  ref: "Person",
+userSchema.virtual("employees", {
+  ref: "Employee",
   localField: "accountId",
   foreignField: "accountId",
 });

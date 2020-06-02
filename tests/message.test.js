@@ -5,15 +5,15 @@ const Attestation = require("../src/models/attestation");
 const {
   createAttestations,
   getAccountsThatAreDue,
-  getPersonsOnAccounts,
+  getEmployeesOnAccount,
   updateAttestationDocument,
 } = require("../src/messages/messages");
 const {
   accountOne,
   accountTwo,
-  personOne,
-  personTwo,
-  personThree,
+  employeeOne,
+  employeeTwo,
+  employeeThree,
   userOne,
   setupDatabase,
 } = require("./fixtures/db");
@@ -40,7 +40,7 @@ test("Should get active accounts including account that has sent messages in pas
   expect(accounts1).toHaveLength(1);
 });
 
-test("Should get active persons from account but not if messages sent today", async () => {
+test("Should get active employees from account but not if messages sent today", async () => {
   const currentTime = new Date();
   const today = moment();
 
@@ -54,28 +54,28 @@ test("Should get active persons from account but not if messages sent today", as
   expect(accounts1).toHaveLength(0);
 });
 
-test("Should get active persons on accounts", async () => {
-  const personsTest1 = await getPersonsOnAccounts([
+test("Should get active employees on accounts", async () => {
+  const employeesTest1 = await getEmployeesOnAccount([
     accountOne._id,
     accountTwo._id,
   ]);
-  expect(personsTest1).toHaveLength(3);
-  const ids = personsTest1.map((p) => p._id);
-  expect([personOne, personTwo, personThree].map((p) => p._id).sort()).toEqual(
+  expect(employeesTest1).toHaveLength(3);
+  const ids = employeesTest1.map((p) => p._id);
+  expect([employeeOne, employeeTwo, employeeThree].map((p) => p._id).sort()).toEqual(
     ids.sort()
   );
 
-  const personsTest2 = await getPersonsOnAccounts([accountTwo._id]);
-  expect(personsTest2).toHaveLength(1);
+  const employeesTest2 = await getEmployeesOnAccount([accountTwo._id]);
+  expect(employeesTest2).toHaveLength(1);
 });
 
 test("Should create attestations", async () => {
-  const persons = await getPersonsOnAccounts([accountOne._id, accountTwo._id]);
-  const attestations = await createAttestations(persons);
+  const employees = await getEmployeesOnAccount([accountOne._id, accountTwo._id]);
+  const attestations = await createAttestations(employees);
   expect(attestations).toHaveLength(3);
   attestations.forEach((a) => {
     expect(a).toHaveProperty("accountId");
-    expect(a).toHaveProperty("personId");
+    expect(a).toHaveProperty("employeeId");
     expect(a).toHaveProperty("phoneNumber");
     expect(a).toHaveProperty("messageSent");
   });
@@ -84,8 +84,8 @@ test("Should create attestations", async () => {
 test("Should update attestation document if one exists for today", async () => {
   // set up test with new attestation document for today
   await new Attestation({
-    personId: personThree._id,
-    accountId: personThree.accountId,
+    employeeId: employeeThree._id,
+    accountId: employeeThree.accountId,
     messageSent: new Date(),
     phoneNumber: "1234561234",
   }).save();
@@ -110,8 +110,8 @@ test("Should update attestation document if one exists for today", async () => {
 test("Should not update attestation document if none exists for today", async () => {
   // set up test with new attestation document with past date
   await new Attestation({
-    personId: personThree._id,
-    accountId: personThree.accountId,
+    employeeId: employeeThree._id,
+    accountId: employeeThree.accountId,
     messageSent: moment(new Date()).subtract(1, "month"),
     phoneNumber: "1234561234",
   }).save();

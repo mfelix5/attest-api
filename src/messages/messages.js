@@ -2,7 +2,7 @@ const moment = require("moment");
 const twilio = require("twilio");
 const Account = require("../models/account");
 const Attestation = require("../models/attestation");
-const Person = require("../models/person");
+const Employee = require("../models/employee");
 const User = require("../models/user");
 const {
   appNotificationToAdmin,
@@ -44,25 +44,25 @@ const getAccountsThatAreDue = async (currentTime) => {
   const today = moment(currentTime).startOf("day");
   return await Account.find({
     active: true,
-    "config.messagesToPersons.dailySendTime": currentTime.getUTCHours(),
+    "config.messagesToEmployees.dailySendTime": currentTime.getUTCHours(),
     $or: [{ lastSent: { $exists: false } }, { lastSent: { $lte: today } }],
   });
 };
 
-const getPersonsOnAccounts = async (accountIds) => {
-  const personPromises = accountIds.map((accountId) => {
-    return Person.find({
+const getEmployeesOnAccount = async (accountIds) => {
+  const employeePromises = accountIds.map((accountId) => {
+    return Employee.find({
       accountId,
       active: true,
     });
   });
-  return [].concat(...(await Promise.all(personPromises)));
+  return [].concat(...(await Promise.all(employeePromises)));
 };
 
 const createOrUpdateAttestation = async (data, accountId) => {
-  const { personId, phoneNumber, messageSent, responseReceived, passCheck } = data;
+  const { employeeId, phoneNumber, messageSent, responseReceived, passCheck } = data;
   const exists = await Attestation.findOne({
-    personId,
+    employeeId,
     messageSent: { $gte: moment(messageSent).startOf("day") },
   });
 
@@ -86,15 +86,15 @@ const createOrUpdateAttestation = async (data, accountId) => {
   }
 }
 
-const createAttestations = async (persons) => {
+const createAttestations = async (employees) => {
   const today = moment().startOf("day");
-  const attestationPromises = persons.map((person) => {
+  const attestationPromises = employees.map((employee) => {
     const attestationData = {
-      personId: person._id,
-      phoneNumber: person.primaryPhone,
+      employeeId: employee._id,
+      phoneNumber: employee.primaryPhone,
       messageSent: new Date()
     }
-    return createOrUpdateAttestation(attestationData, person.accountId)
+    return createOrUpdateAttestation(attestationData, employee.accountId)
   });
   const attestations = [].concat(...(await Promise.all(attestationPromises)));
   return attestations;
@@ -103,8 +103,8 @@ const createAttestations = async (persons) => {
 const sendMessagesToPeopleThatMustAttest = async (currentTime) => {
   try {
     const accounts = await getAccountsThatAreDue(currentTime);
-    const persons = await getPersonsOnAccounts(accounts.map((a) => a._id));
-    const attestations = await createAttestations(persons);
+    const employees = await getEmployeesOnAccount(accounts.map((a) => a._id));
+    const attestations = await createAttestations(employees);
 
     // send SMS
     console.log(`Sending ${attestations.length} messages`);
@@ -113,11 +113,11 @@ const sendMessagesToPeopleThatMustAttest = async (currentTime) => {
     });
 
     // update lastSent on each account
-    const accountsToUpdate = [...new Set(persons.map((p) => p.accountId))];
+    const accountsToUpdate = [...new Set(employees.map((p) => p.accountId))];
     const accountUpdatePromises = accountsToUpdate.map((accountId) => {
       return Account.findOneAndUpdate(
         { _id: accountId },
-        { "config.messagesToPersons.lastSent": moment() }
+        { "config.messagesToEmployees.lastSent": moment() }
       );
     });
     await Promise.all(accountUpdatePromises);
@@ -150,12 +150,12 @@ const notifyAdmins = async (phoneNumber) => {
   let number = phoneNumber.slice();
   if (phoneNumber.startsWith("+1")) number = phoneNumber.slice(2);
 
-  const personOfConcern = await Person.findOne({ primaryPhone: number });
+  const employee = await Employee.findOne({ primaryPhone: number });
   const relatedAdmins = await User.find({
-    accountId: personOfConcern.accountId,
+    accountId: employee.accountId,
     isAdmin: true,
   });
-  const message = `${personOfConcern.firstName} ${personOfConcern.lastName} ${appNotificationToAdmin}`;
+  const message = `${employee.firstName} ${employee.lastName} ${appNotificationToAdmin}`;
   relatedAdmins.forEach((admin) => {
     sendMessage(admin.phoneNumber, message);
   });
@@ -165,7 +165,7 @@ module.exports = {
   createAttestations,
   createOrUpdateAttestation,
   getAccountsThatAreDue,
-  getPersonsOnAccounts,
+  getEmployeesOnAccount,
   notifyAdmins,
   sendMessagesToPeopleThatMustAttest,
   updateAttestationDocument,

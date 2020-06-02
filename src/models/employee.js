@@ -15,7 +15,7 @@ const mongoose = require("mongoose");
 //   },
 // });
 
-const personSchema = new mongoose.Schema(
+const employeeSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
@@ -48,6 +48,6 @@ const personSchema = new mongoose.Schema(
   }
 );
 
-const Person = mongoose.model("Person", personSchema);
+const Employee = mongoose.model("Employee", employeeSchema);
 
-module.exports = Person;
+module.exports = Employee;

@@ -7,10 +7,7 @@ const {
   attestationTwo,
   attestationThree,
   attestationFour,
-  personOne,
-  personTwo,
-  personThree,
-  personFour,
+  employeeOne,
   userOne,
   userTwo,
   setupDatabase,
@@ -23,7 +20,7 @@ test("Should create an attestation with the user's accountId", async () => {
     .post("/attestations")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
-      personId: personOne._id,
+      employeeId: employeeOne._id,
       phoneNumber: "1234567890",
       messageSent: new Date(),
     })
@@ -52,9 +49,9 @@ test("Should only fetch attestations that belong to a user's account", async () 
 test("Should filter attestations by status", async () => {
   // set up test with attestation that has received response
   const newAttestation = await new Attestation({
-    personId: personOne._id,
-    accountId: personOne.accountId,
-    phoneNumber: personOne.primaryPhone,
+    employeeId: employeeOne._id,
+    accountId: employeeOne.accountId,
+    phoneNumber: employeeOne.primaryPhone,
     messageSent: new Date(),
     responseReceived: new Date()
   }).save();
@@ -87,7 +84,7 @@ test("Should limit and paginate attestations", async () => {
   expect(response1.body).toHaveLength(2);
 
   const response2 = await request(app)
-    .get("/attestations?limit=1&sortBy=personId:asc")
+    .get("/attestations?limit=1&sortBy=employeeId:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
@@ -97,7 +94,7 @@ test("Should limit and paginate attestations", async () => {
   expect(attestation._id).toEqual(attestationThree._id.toString());
 
   const response3 = await request(app)
-    .get("/attestations?limit=1&skip=1&sortBy=personId:asc")
+    .get("/attestations?limit=1&skip=1&sortBy=employeeId:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
@@ -150,14 +147,14 @@ test("Should not update invalid attestation fields", async () => {
   .expect(400);
 });
 
-test("Should not create more than one attestation for a person on one day", async () => {
+test("Should not create more than one attestation for an employee on one day", async () => {
   const today = moment().startOf("day");
   const thisMorning = today.add(1, "hour");
   const firstResponse = await request(app)
     .post("/attestations")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send({
-      personId: userTwo._id,
+      employeeId: userTwo._id,
       phoneNumber: "1234567890",
       messageSent: today,
     })
@@ -170,7 +167,7 @@ test("Should not create more than one attestation for a person on one day", asyn
     .post("/attestations")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send({
-      personId: userTwo._id,
+      employeeId: userTwo._id,
       phoneNumber: "1234567891",
       messageSent: thisMorning,
       passCheck: false
@@ -178,7 +175,7 @@ test("Should not create more than one attestation for a person on one day", asyn
     .expect(201);
 
   const found = await Attestation.find({
-    personId: userTwo._id,
+    employeeId: userTwo._id,
     createdAt: { $gte: today },
     messageSent: { $gte: today },
   });

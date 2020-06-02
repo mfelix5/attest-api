@@ -1,26 +1,26 @@
 const express = require("express");
-const Person = require("../models/person");
+const Employee = require("../models/employee");
 const auth = require("../middleware/auth");
 const router = new express.Router();
 
-router.post("/persons", auth, async (req, res) => {
-  const person = new Person({
+router.post("/employees", auth, async (req, res) => {
+  const employee = new Employee({
     ...req.body,
     accountId: req.user.accountId,
   });
 
   try {
-    await person.save();
-    res.status(201).send(person);
+    await employee.save();
+    res.status(201).send(employee);
   } catch (e) {
     res.status(400).send(e);
   }
 });
 
-// GET /persons?active=true
-// GET /persons?limit=10&skip=20
-// GET /persons?sortBy=createdAt:desc
-router.get("/persons", auth, async (req, res) => {
+// GET /employees?active=true
+// GET /employees?limit=10&skip=20
+// GET /employees?sortBy=createdAt:desc
+router.get("/employees", auth, async (req, res) => {
   const match = {};
   const sort = {};
 
@@ -36,7 +36,7 @@ router.get("/persons", auth, async (req, res) => {
   try {
     await req.user
       .populate({
-        path: "persons",
+        path: "employees",
         match,
         options: {
           limit: parseInt(req.query.limit),
@@ -45,29 +45,29 @@ router.get("/persons", auth, async (req, res) => {
         },
       })
       .execPopulate();
-    res.send(req.user.persons);
+    res.send(req.user.employees);
   } catch (e) {
     res.status(500).send();
   }
 });
 
-router.get("/persons/:id", auth, async (req, res) => {
+router.get("/employees/:id", auth, async (req, res) => {
   const _id = req.params.id;
 
   try {
-    const person = await Person.findOne({ _id, accountId: req.user.accountId });
+    const employee = await Employee.findOne({ _id, accountId: req.user.accountId });
 
-    if (!person) {
+    if (!employee) {
       return res.status(404).send();
     }
 
-    res.send(person);
+    res.send(employee);
   } catch (e) {
     res.status(500).send();
   }
 });
 
-router.patch("/persons/:id", auth, async (req, res) => {
+router.patch("/employees/:id", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["firstName", "lastName", "otherId", "active", "primaryPhone", "phoneNumbers"];
   const isValidOperation = updates.every((update) =>
@@ -79,35 +79,35 @@ router.patch("/persons/:id", auth, async (req, res) => {
   }
 
   try {
-    const person = await Person.findOne({
+    const employee = await Employee.findOne({
       _id: req.params.id,
       accountId: req.user.accountId,
     });
 
-    if (!person) {
+    if (!employee) {
       return res.status(404).send();
     }
 
-    updates.forEach((update) => (person[update] = req.body[update]));
-    await person.save();
-    res.send(person);
+    updates.forEach((update) => (employee[update] = req.body[update]));
+    await employee.save();
+    res.send(employee);
   } catch (e) {
     res.status(400).send(e);
   }
 });
 
-router.delete("/persons/:id", auth, async (req, res) => {
+router.delete("/employees/:id", auth, async (req, res) => {
   try {
-    const person = await Person.findOneAndDelete({
+    const employee = await Employee.findOneAndDelete({
       _id: req.params.id,
       accountId: req.user.accountId,
     });
 
-    if (!person) {
+    if (!employee) {
       res.status(404).send();
     }
 
-    res.send(person);
+    res.send(employee);
   } catch (e) {
     res.status(500).send();
   }

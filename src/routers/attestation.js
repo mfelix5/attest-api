@@ -6,8 +6,8 @@ const router = new express.Router();
 
 router.post("/attestations", auth, async (req, res) => {
   try {
-    if (!req.body.personId || !req.body.messageSent) {
-      return res.status(400).send({ error: "personId and messageSent are required." });
+    if (!req.body.employeeId || !req.body.messageSent) {
+      return res.status(400).send({ error: "employeeId and messageSent are required." });
     }
     const attestation = await createOrUpdateAttestation(req.body, req.user.accountId);
     res.status(201).send(attestation);

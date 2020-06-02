@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Person = require("./person");
+const Employee = require("./employee");
 const statesArray = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"];
 
 const accountSchema = new mongoose.Schema(
@@ -42,7 +42,7 @@ const accountSchema = new mongoose.Schema(
     },
     config: {
       type: {
-        messagesToPersons: {
+        messagesToEmployees: {
           dailySendTime: { type: Number, min: 0, max: 23 }, // UTC hour
           lastSent: { type: Date }
         },
@@ -59,10 +59,10 @@ const accountSchema = new mongoose.Schema(
   }
 );
 
-// Delete persons of concern when account is removed
+// Delete employees when account is removed
 accountSchema.pre("remove", async function (next) {
   const account = this;
-  await Person.deleteMany({ accountId: account._id });
+  await Employee.deleteMany({ accountId: account._id });
   next();
 });
 

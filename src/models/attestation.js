@@ -7,10 +7,10 @@ const attestationSchema = new mongoose.Schema(
       required: true,
       ref: "Account",
     },
-    personId: {
+    employeeId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      ref: "Person",
+      ref: "Employee",
     },
     phoneNumber: { type: String, required: true },
     messageSent: { type: Date, required: true },

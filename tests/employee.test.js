@@ -1,11 +1,11 @@
 const request = require("supertest");
 const app = require("../src/app");
-const Person = require("../src/models/person");
+const Employee = require("../src/models/employee");
 const {
-  personOne,
-  personTwo,
-  personThree,
-  personFour,
+  employeeOne,
+  employeeTwo,
+  employeeThree,
+  employeeFour,
   userOne,
   userTwo,
   setupDatabase,
@@ -13,9 +13,9 @@ const {
 
 beforeEach(setupDatabase);
 
-test("Should create person of concern with the user's accountId", async () => {
+test("Should create employee with the user's accountId", async () => {
   const response = await request(app)
-    .post("/persons")
+    .post("/employees")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
       firstName: "Test",
@@ -29,14 +29,14 @@ test("Should create person of concern with the user's accountId", async () => {
       ],
     })
     .expect(201);
-  const person = await Person.findById(response.body._id);
-  expect(person).not.toBeNull();
-  expect(person.accountId).toEqual(userOne.accountId);
+  const employee = await Employee.findById(response.body._id);
+  expect(employee).not.toBeNull();
+  expect(employee.accountId).toEqual(userOne.accountId);
 });
 
-test("Should only fetch persons of concern that belong to a user's account", async () => {
+test("Should only fetch employees that belong to a user's account", async () => {
   const response = await request(app)
-    .get("/persons")
+    .get("/employees")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
@@ -44,118 +44,118 @@ test("Should only fetch persons of concern that belong to a user's account", asy
   expect(response.body.length).toEqual(2);
   expect(
     response.body.every(
-      (person) => person.accountId === userOne.accountId.toString()
+      (employee) => employee.accountId === userOne.accountId.toString()
     )
   ).toBe(true);
 });
 
-test("Should filter persons that are active or inactive", async () => {
+test("Should filter employees that are active or inactive", async () => {
   const response = await request(app)
-    .get("/persons?active=true")
+    .get("/employees?active=true")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
 
-  const activePersons = response.body;
-  expect(activePersons).toHaveLength(2);
+  const activeEmployees = response.body;
+  expect(activeEmployees).toHaveLength(2);
 
   const response2 = await request(app)
-    .get("/persons?active=false")
+    .get("/employees?active=false")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
 
-  const inactivePersons = response2.body;
-  expect(inactivePersons).toHaveLength(0);
+  const inactiveEmployees = response2.body;
+  expect(inactiveEmployees).toHaveLength(0);
 
   const response3 = await request(app)
-    .get("/persons?active=true")
+    .get("/employees?active=true")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
 
-  const activePersonsAccount2 = response3.body;
-  expect(activePersonsAccount2).toHaveLength(1);
+  const activeEmployeesAccount2 = response3.body;
+  expect(activeEmployeesAccount2).toHaveLength(1);
 });
 
-test("Should sort persons", async () => {
+test("Should sort employees", async () => {
   const response1 = await request(app)
-    .get("/persons?sortBy=firstName:asc")
+    .get("/employees?sortBy=firstName:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
 
   expect(response1.body).toHaveLength(2);
-  const firstNames = response1.body.map(person => person.firstName);
+  const firstNames = response1.body.map(employee => employee.firstName);
   expect(firstNames).toEqual(["Fourth", "Third"])
 
   const response2 = await request(app)
-    .get("/persons?sortBy=firstName:desc")
+    .get("/employees?sortBy=firstName:desc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
 
   expect(response2.body).toHaveLength(2);
-  const firstNameArray = response2.body.map(person => person.firstName);
+  const firstNameArray = response2.body.map(employee => employee.firstName);
   expect(firstNameArray).toEqual(["Third", "Fourth"])
 
 });
 
-test("Should limit and paginate persons", async () => {
+test("Should limit and paginate employees", async () => {
   const response1 = await request(app)
-    .get("/persons?limit=0&sortBy=firstName:desc")
+    .get("/employees?limit=0&sortBy=firstName:desc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response1.body).toHaveLength(2);
 
   const response2 = await request(app)
-    .get("/persons?limit=1&sortBy=firstName:desc")
+    .get("/employees?limit=1&sortBy=firstName:desc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response2.body).toHaveLength(1);
-  const person = response2.body[0];
-  expect(person._id).toEqual(personThree._id.toString());
+  const employee = response2.body[0];
+  expect(employee._id).toEqual(employeeThree._id.toString());
 
   const response3 = await request(app)
-    .get("/persons?limit=1&skip=1&sortBy=firstName:desc")
+    .get("/employees?limit=1&skip=1&sortBy=firstName:desc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response3.body).toHaveLength(1);
-  const returnedPerson = response3.body[0];
-  expect(returnedPerson._id).toEqual(personFour._id.toString());
+  const returnedEmployee = response3.body[0];
+  expect(returnedEmployee._id).toEqual(employeeFour._id.toString());
 });
 
-test("Should not delete persons of concern from other accounts", async () => {
+test("Should not delete employees from other accounts", async () => {
   await request(app)
-    .delete(`/persons/${personOne._id}`)
+    .delete(`/employees/${employeeOne._id}`)
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(404);
 
-  const person = await Person.findById(personOne._id);
-  expect(person).not.toBeNull();
+  const employee = await Employee.findById(employeeOne._id);
+  expect(employee).not.toBeNull();
 });
 
-test("Should update valid person fields", async () => {
+test("Should update valid employee fields", async () => {
   await request(app)
-    .patch(`/persons/${personTwo._id}`)
+    .patch(`/employees/${employeeTwo._id}`)
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
       firstName: "Jess",
       active: false
     })
     .expect(200);
-  const person = await Person.findById(personTwo._id);
-  expect(person.firstName).toEqual("Jess");
-  expect(person.active).toEqual(false);
+  const employee = await Employee.findById(employeeTwo._id);
+  expect(employee.firstName).toEqual("Jess");
+  expect(employee.active).toEqual(false);
 });
 
-test("Should not update invalid person fields", async () => {
+test("Should not update invalid employee fields", async () => {
   await request(app)
-  .patch(`/persons/${personThree._id}`)
+  .patch(`/employees/${employeeThree._id}`)
   .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
   .send({
     badProperty: "Test",

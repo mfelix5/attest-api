@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const Account = require("../../src/models/account");
 const Attestation = require("../../src/models/attestation");
 const User = require("../../src/models/user");
-const Person = require("../../src/models/person");
+const Employee = require("../../src/models/employee");
 
 const accountOneId = new mongoose.Types.ObjectId();
 const accountOne = {
@@ -11,7 +11,7 @@ const accountOne = {
   name: "First Account, LLC",
   active: true,
   config: {
-    messagesToPersons: {
+    messagesToEmployees: {
       dailySendTime: (new Date()).getUTCHours()
     }
   }
@@ -53,69 +53,69 @@ const userTwo = {
   phoneNumber: "8025551212"
 };
 
-const personOne = {
+const employeeOne = {
   _id: new mongoose.Types.ObjectId(),
   firstName: "First",
-  lastName: "Person",
+  lastName: "Employee",
   otherId: "123ABC",
   accountId: userOne.accountId,
   primaryPhone: "1234567890",
 };
 
-const personTwo = {
+const employeeTwo = {
   _id: new mongoose.Types.ObjectId(),
   firstName: "Second",
-  lastName: "Person",
+  lastName: "Employee",
   accountId: userOne.accountId,
   primaryPhone: "1234567899",
 };
 
-const personThree = {
+const employeeThree = {
   _id: new mongoose.Types.ObjectId(),
   firstName: "Third",
-  lastName: "Person",
+  lastName: "Employee",
   accountId: userTwo.accountId,
   primaryPhone: "1234567890",
 };
 
-const personFour = {
+const employeeFour = {
   _id: new mongoose.Types.ObjectId(),
   active: false,
   firstName: "Fourth",
-  lastName: "Person",
+  lastName: "Employee",
   accountId: userTwo.accountId,
   primaryPhone: "1234567890",
 };
 
 const attestationOne = {
   _id: new mongoose.Types.ObjectId(),
-  personId: personOne._id,
-  accountId: personOne.accountId,
-  phoneNumber: personOne.primaryPhone,
+  employeeId: employeeOne._id,
+  accountId: employeeOne.accountId,
+  phoneNumber: employeeOne.primaryPhone,
   messageSent: new Date()
 };
 
 const attestationTwo = {
   _id: new mongoose.Types.ObjectId(),
-  personId: personTwo._id,
-  accountId: personTwo.accountId,
-  phoneNumber: personTwo.primaryPhone,
+  employeeId: employeeTwo._id,
+  accountId: employeeTwo.accountId,
+  phoneNumber: employeeTwo.primaryPhone,
   messageSent: new Date()
 };
 
 const attestationThree = {
   _id: new mongoose.Types.ObjectId(),
-  personId: personThree._id,
-  accountId: personThree.accountId,
-  phoneNumber: personThree.primaryPhone,
+  employeeId: employeeThree._id,
+  accountId: employeeThree.accountId,
+  phoneNumber: employeeThree.primaryPhone,
   messageSent: new Date()
 };
 
 const attestationFour = {
   _id: new mongoose.Types.ObjectId(),
-  personId: personFour._id,
-  accountId: personFour.accountId,
-  phoneNumber: personFour.primaryPhone,
+  employeeId: employeeFour._id,
+  accountId: employeeFour.accountId,
+  phoneNumber: employeeFour.primaryPhone,
   messageSent: new Date()
 };
 
@@ -124,7 +124,7 @@ const setupDatabase = async () => {
     await Promise.all([
       Account.deleteMany(),
       User.deleteMany(),
-      Person.deleteMany(),
+      Employee.deleteMany(),
       Attestation.deleteMany()
     ]);
 
@@ -136,10 +136,10 @@ const setupDatabase = async () => {
     await Promise.all([new User(userOne).save(), new User(userTwo).save()]);
 
     await Promise.all([
-      new Person(personOne).save(),
-      new Person(personTwo).save(),
-      new Person(personThree).save(),
-      new Person(personFour).save()
+      new Employee(employeeOne).save(),
+      new Employee(employeeTwo).save(),
+      new Employee(employeeThree).save(),
+      new Employee(employeeFour).save()
     ]);
 
     await Promise.all([
@@ -166,9 +166,9 @@ module.exports = {
   userOne,
   userTwoId,
   userTwo,
-  personOne,
-  personTwo,
-  personThree,
-  personFour,
+  employeeOne,
+  employeeTwo,
+  employeeThree,
+  employeeFour,
   setupDatabase,
 };
