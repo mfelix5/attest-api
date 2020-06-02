@@ -60,7 +60,7 @@ const getEmployeesOnAccount = async (accountIds) => {
 };
 
 const createOrUpdateCheck = async (data, accountId) => {
-  const { employeeId, phoneNumber, messageSent, responseReceived, passCheck } = data;
+  const { employeeId, messageSent, responseReceived, passCheck } = data;
   const exists = await Check.findOne({
     employeeId,
     messageSent: { $gte: moment(messageSent).startOf("day") },
@@ -71,8 +71,7 @@ const createOrUpdateCheck = async (data, accountId) => {
     return await Check.findOneAndUpdate({
       _id: exists._id
     }, {
-      phoneNumber,
-      messageSent,
+      ...data,
       responseReceived,
       passCheck
     });
