@@ -1,16 +1,16 @@
 const express = require("express");
-const Attestation = require("../models/attestation");
+const Check = require("../models/check");
 const auth = require("../middleware/auth");
-const { createOrUpdateAttestation } = require("../messages/messages");
+const { createOrUpdateCheck } = require("../messages/messages");
 const router = new express.Router();
 
-router.post("/attestations", auth, async (req, res) => {
+router.post("/checks", auth, async (req, res) => {
   try {
     if (!req.body.employeeId || !req.body.messageSent) {
       return res.status(400).send({ error: "employeeId and messageSent are required." });
     }
-    const attestation = await createOrUpdateAttestation(req.body, req.user.accountId);
-    res.status(201).send(attestation);
+    const check = await createOrUpdateCheck(req.body, req.user.accountId);
+    res.status(201).send(check);
 
   } catch (e) {
     console.log("e", e);
@@ -18,10 +18,10 @@ router.post("/attestations", auth, async (req, res) => {
   }
 });
 
-// GET /attestations?status=responseReceived
-// GET /attestations?limit=10&skip=20
-// GET /attestations?sortBy=createdAt:desc
-router.get("/attestations", auth, async (req, res) => {
+// GET /checks?status=responseReceived
+// GET /checks?limit=10&skip=20
+// GET /checks?sortBy=createdAt:desc
+router.get("/checks", auth, async (req, res) => {
   const match = {};
   const sort = {};
 
@@ -41,7 +41,7 @@ router.get("/attestations", auth, async (req, res) => {
   try {
     await req.user
       .populate({
-        path: "attestations",
+        path: "checks",
         match,
         options: {
           limit: parseInt(req.query.limit),
@@ -50,29 +50,29 @@ router.get("/attestations", auth, async (req, res) => {
         },
       })
       .execPopulate();
-    res.send(req.user.attestations);
+    res.send(req.user.checks);
   } catch (e) {
     res.status(500).send();
   }
 });
 
-router.get("/attestations/:id", auth, async (req, res) => {
+router.get("/checks/:id", auth, async (req, res) => {
   const _id = req.params.id;
 
   try {
-    const attestation = await Attestation.findOne({ _id, accountId: req.user.accountId });
+    const check = await Check.findOne({ _id, accountId: req.user.accountId });
 
-    if (!attestation) {
+    if (!check) {
       return res.status(404).send();
     }
 
-    res.send(attestation);
+    res.send(check);
   } catch (e) {
     res.status(500).send();
   }
 });
 
-router.patch("/attestations/:id", auth, async (req, res) => {
+router.patch("/checks/:id", auth, async (req, res) => {
   const updates = Object.keys(req.body);
   const allowedUpdates = ["status", "passCheck", "phoneNumber", "messageSent", "responseReceived"];
   const isValidOperation = updates.every((update) =>
@@ -84,35 +84,35 @@ router.patch("/attestations/:id", auth, async (req, res) => {
   }
 
   try {
-    const attestation = await Attestation.findOne({
+    const check = await Check.findOne({
       _id: req.params.id,
       accountId: req.user.accountId,
     });
 
-    if (!attestation) {
+    if (!check) {
       return res.status(404).send();
     }
 
-    updates.forEach((update) => (attestation[update] = req.body[update]));
-    await attestation.save();
-    res.send(attestation);
+    updates.forEach((update) => (check[update] = req.body[update]));
+    await check.save();
+    res.send(check);
   } catch (e) {
     res.status(400).send(e);
   }
 });
 
-router.delete("/attestations/:id", auth, async (req, res) => {
+router.delete("/checks/:id", auth, async (req, res) => {
   try {
-    const attestation = await Attestation.findOneAndDelete({
+    const check = await Check.findOneAndDelete({
       _id: req.params.id,
       accountId: req.user.accountId,
     });
 
-    if (!attestation) {
+    if (!check) {
       res.status(404).send();
     }
 
-    res.send(attestation);
+    res.send(check);
   } catch (e) {
     res.status(500).send();
   }

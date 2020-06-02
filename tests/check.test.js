@@ -1,12 +1,12 @@
 const request = require("supertest");
 const app = require("../src/app");
 const moment = require("moment");
-const Attestation = require("../src/models/attestation");
+const Check = require("../src/models/check");
 const {
-  attestationOne,
-  attestationTwo,
-  attestationThree,
-  attestationFour,
+  checkOne,
+  checkTwo,
+  checkThree,
+  checkFour,
   employeeOne,
   userOne,
   userTwo,
@@ -15,9 +15,9 @@ const {
 
 beforeEach(setupDatabase);
 
-test("Should create an attestation with the user's accountId", async () => {
+test("Should create an check with the user's accountId", async () => {
   const response = await request(app)
-    .post("/attestations")
+    .post("/checks")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
       employeeId: employeeOne._id,
@@ -26,14 +26,14 @@ test("Should create an attestation with the user's accountId", async () => {
     })
     .expect(201);
 
-  const attestation = await Attestation.findById(response.body._id);
-  expect(attestation).not.toBeNull();
-  expect(attestation.accountId).toEqual(userOne.accountId);
+  const check = await Check.findById(response.body._id);
+  expect(check).not.toBeNull();
+  expect(check.accountId).toEqual(userOne.accountId);
 });
 
-test("Should only fetch attestations that belong to a user's account", async () => {
+test("Should only fetch checks that belong to a user's account", async () => {
   const response = await request(app)
-    .get("/attestations")
+    .get("/checks")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
@@ -41,14 +41,14 @@ test("Should only fetch attestations that belong to a user's account", async () 
   expect(response.body.length).toEqual(2);
   expect(
     response.body.every(
-      (attestation) => attestation.accountId === userOne.accountId.toString()
+      (check) => check.accountId === userOne.accountId.toString()
     )
   ).toBe(true);
 });
 
-test("Should filter attestations by status", async () => {
-  // set up test with attestation that has received response
-  const newAttestation = await new Attestation({
+test("Should filter checks by status", async () => {
+  // set up test with check that has received response
+  const newCheck = await new Check({
     employeeId: employeeOne._id,
     accountId: employeeOne.accountId,
     phoneNumber: employeeOne.primaryPhone,
@@ -57,89 +57,89 @@ test("Should filter attestations by status", async () => {
   }).save();
 
   const response1 = await request(app)
-    .get("/attestations?status=messageSent")
+    .get("/checks?status=messageSent")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
 
-  const sentAttestations = response1.body;
-  expect(sentAttestations).toHaveLength(2);
+  const sentChecks = response1.body;
+  expect(sentChecks).toHaveLength(2);
 
   const response2 = await request(app)
-    .get("/attestations?status=responseReceived")
+    .get("/checks?status=responseReceived")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send()
     .expect(200);
 
-  const receivedAttestations = response2.body;
-  expect(receivedAttestations).toHaveLength(1);
+  const receivedChecks = response2.body;
+  expect(receivedChecks).toHaveLength(1);
 });
 
-test("Should limit and paginate attestations", async () => {
+test("Should limit and paginate checks", async () => {
   const response1 = await request(app)
-    .get("/attestations?limit=0")
+    .get("/checks?limit=0")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response1.body).toHaveLength(2);
 
   const response2 = await request(app)
-    .get("/attestations?limit=1&sortBy=employeeId:asc")
+    .get("/checks?limit=1&sortBy=employeeId:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response2.body).toHaveLength(1);
 
-  const attestation = response2.body[0];
-  expect(attestation._id).toEqual(attestationThree._id.toString());
+  const check = response2.body[0];
+  expect(check._id).toEqual(checkThree._id.toString());
 
   const response3 = await request(app)
-    .get("/attestations?limit=1&skip=1&sortBy=employeeId:asc")
+    .get("/checks?limit=1&skip=1&sortBy=employeeId:asc")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(200);
   expect(response3.body).toHaveLength(1);
-  const returnedAttestation = response3.body[0];
-  expect(returnedAttestation._id).toEqual(attestationFour._id.toString());
+  const returnedCheck = response3.body[0];
+  expect(returnedCheck._id).toEqual(checkFour._id.toString());
 });
 
-// xtest("Should sort attestations", async () => {
+// xtest("Should sort checks", async () => {
 //   const response1 = await request(app)
-//     .get("/attestations?sortBy=createdAt:asc")
+//     .get("/checks?sortBy=createdAt:asc")
 //     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
 //     .send()
 //     .expect(200);
 // });
 
-test("Should not delete attestations from other accounts", async () => {
+test("Should not delete checks from other accounts", async () => {
   await request(app)
-    .delete(`/attestations/${attestationOne._id}`)
+    .delete(`/checks/${checkOne._id}`)
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send()
     .expect(404);
 
-  const attestation = await Attestation.findById(attestationOne._id);
-  expect(attestation).not.toBeNull();
+  const check = await Check.findById(checkOne._id);
+  expect(check).not.toBeNull();
 });
 
-test("Should update valid attestation fields", async () => {
+test("Should update valid check fields", async () => {
   const now = Date.now()
   await request(app)
-    .patch(`/attestations/${attestationTwo._id}`)
+    .patch(`/checks/${checkTwo._id}`)
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
     .send({
       passCheck: true,
       responseReceived: now
     })
     .expect(200);
-  const attestation = await Attestation.findById(attestationTwo._id);
-  expect(moment(attestation.responseReceived).format()).toEqual(moment(now).format());
-  expect(attestation.passCheck).toEqual(true);
+  const check = await Check.findById(checkTwo._id);
+  expect(moment(check.responseReceived).format()).toEqual(moment(now).format());
+  expect(check.passCheck).toEqual(true);
 });
 
-test("Should not update invalid attestation fields", async () => {
+test("Should not update invalid check fields", async () => {
   await request(app)
-  .patch(`/attestations/${attestationOne._id}`)
+  .patch(`/checks/${checkOne._id}`)
   .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
   .send({
     badProperty: "Test",
@@ -147,11 +147,11 @@ test("Should not update invalid attestation fields", async () => {
   .expect(400);
 });
 
-test("Should not create more than one attestation for an employee on one day", async () => {
+test("Should not create more than one check for an employee on one day", async () => {
   const today = moment().startOf("day");
   const thisMorning = today.add(1, "hour");
   const firstResponse = await request(app)
-    .post("/attestations")
+    .post("/checks")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send({
       employeeId: userTwo._id,
@@ -160,11 +160,11 @@ test("Should not create more than one attestation for an employee on one day", a
     })
     .expect(201);
 
-  const attestation = await Attestation.findById(firstResponse.body._id);
-  expect(attestation).not.toBeNull();
+  const check = await Check.findById(firstResponse.body._id);
+  expect(check).not.toBeNull();
 
   await request(app)
-    .post("/attestations")
+    .post("/checks")
     .set("Authorization", `Bearer ${userTwo.tokens[0].token}`)
     .send({
       employeeId: userTwo._id,
@@ -174,7 +174,7 @@ test("Should not create more than one attestation for an employee on one day", a
     })
     .expect(201);
 
-  const found = await Attestation.find({
+  const found = await Check.find({
     employeeId: userTwo._id,
     createdAt: { $gte: today },
     messageSent: { $gte: today },

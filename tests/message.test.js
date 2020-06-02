@@ -1,12 +1,12 @@
 const moment = require("moment");
 const request = require("supertest");
 const app = require("../src/app");
-const Attestation = require("../src/models/attestation");
+const Check = require("../src/models/check");
 const {
-  createAttestations,
+  createChecks,
   getAccountsThatAreDue,
   getEmployeesOnAccount,
-  updateAttestationDocument,
+  updateCheckDocument,
 } = require("../src/messages/messages");
 const {
   accountOne,
@@ -69,11 +69,11 @@ test("Should get active employees on accounts", async () => {
   expect(employeesTest2).toHaveLength(1);
 });
 
-test("Should create attestations", async () => {
+test("Should create checks", async () => {
   const employees = await getEmployeesOnAccount([accountOne._id, accountTwo._id]);
-  const attestations = await createAttestations(employees);
-  expect(attestations).toHaveLength(3);
-  attestations.forEach((a) => {
+  const checks = await createChecks(employees);
+  expect(checks).toHaveLength(3);
+  checks.forEach((a) => {
     expect(a).toHaveProperty("accountId");
     expect(a).toHaveProperty("employeeId");
     expect(a).toHaveProperty("phoneNumber");
@@ -81,9 +81,9 @@ test("Should create attestations", async () => {
   });
 });
 
-test("Should update attestation document if one exists for today", async () => {
-  // set up test with new attestation document for today
-  await new Attestation({
+test("Should update check document if one exists for today", async () => {
+  // set up test with new check document for today
+  await new Check({
     employeeId: employeeThree._id,
     accountId: employeeThree.accountId,
     messageSent: new Date(),
@@ -91,34 +91,34 @@ test("Should update attestation document if one exists for today", async () => {
   }).save();
 
   const today = moment(Date.now()).startOf("day").format();
-  const updatedAttestation = await updateAttestationDocument(
+  const updatedCheck = await updateCheckDocument(
     "yes",
     "1234561234"
   );
-  expect(updatedAttestation.passCheck).toBe(false);
+  expect(updatedCheck.passCheck).toBe(false);
   expect(
-    moment(updatedAttestation.replyReceived).startOf("day").format()
+    moment(updatedCheck.replyReceived).startOf("day").format()
   ).toEqual(today);
 
-  const updatedAttestation2 = await updateAttestationDocument(
+  const updatedCheck2 = await updateCheckDocument(
     "no",
     "1234561234"
   );
-  expect(updatedAttestation2.passCheck).toBe(true);
+  expect(updatedCheck2.passCheck).toBe(true);
 });
 
-test("Should not update attestation document if none exists for today", async () => {
-  // set up test with new attestation document with past date
-  await new Attestation({
+test("Should not update check document if none exists for today", async () => {
+  // set up test with new check document with past date
+  await new Check({
     employeeId: employeeThree._id,
     accountId: employeeThree.accountId,
     messageSent: moment(new Date()).subtract(1, "month"),
     phoneNumber: "1234561234",
   }).save();
 
-  const updatedAttestation = await updateAttestationDocument(
+  const updatedCheck = await updateCheckDocument(
     "yes",
     "1234561234"
   );
-  expect(updatedAttestation).toBe(null);
+  expect(updatedCheck).toBe(null);
 });

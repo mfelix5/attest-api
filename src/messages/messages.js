@@ -1,7 +1,7 @@
 const moment = require("moment");
 const twilio = require("twilio");
 const Account = require("../models/account");
-const Attestation = require("../models/attestation");
+const Check = require("../models/check");
 const Employee = require("../models/employee");
 const User = require("../models/user");
 const {
@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === "prod") {
 }
 
 /**
- * Sends an SMS to the specified phone number in an attestation
+ * Sends an SMS to the specified phone number in an check
  */
 const sendMessage = async (phoneNumber, message) => {
   const options = {
@@ -59,16 +59,16 @@ const getEmployeesOnAccount = async (accountIds) => {
   return [].concat(...(await Promise.all(employeePromises)));
 };
 
-const createOrUpdateAttestation = async (data, accountId) => {
+const createOrUpdateCheck = async (data, accountId) => {
   const { employeeId, phoneNumber, messageSent, responseReceived, passCheck } = data;
-  const exists = await Attestation.findOne({
+  const exists = await Check.findOne({
     employeeId,
     messageSent: { $gte: moment(messageSent).startOf("day") },
   });
 
   if (exists) {
     // update
-    return await Attestation.findOneAndUpdate({
+    return await Check.findOneAndUpdate({
       _id: exists._id
     }, {
       phoneNumber,
@@ -78,38 +78,38 @@ const createOrUpdateAttestation = async (data, accountId) => {
     });
   } else {
     //create
-    const attestation = new Attestation({
+    const check = new Check({
       ...data,
       accountId,
     });
-    return await attestation.save();
+    return await check.save();
   }
 }
 
-const createAttestations = async (employees) => {
+const createChecks = async (employees) => {
   const today = moment().startOf("day");
-  const attestationPromises = employees.map((employee) => {
-    const attestationData = {
+  const checkPromises = employees.map((employee) => {
+    const checkData = {
       employeeId: employee._id,
       phoneNumber: employee.primaryPhone,
       messageSent: new Date()
     }
-    return createOrUpdateAttestation(attestationData, employee.accountId)
+    return createOrUpdateCheck(checkData, employee.accountId)
   });
-  const attestations = [].concat(...(await Promise.all(attestationPromises)));
-  return attestations;
+  const checks = [].concat(...(await Promise.all(checkPromises)));
+  return checks;
 };
 
 const sendMessagesToPeopleThatMustAttest = async (currentTime) => {
   try {
     const accounts = await getAccountsThatAreDue(currentTime);
     const employees = await getEmployeesOnAccount(accounts.map((a) => a._id));
-    const attestations = await createAttestations(employees);
+    const checks = await createChecks(employees);
 
     // send SMS
-    console.log(`Sending ${attestations.length} messages`);
-    attestations.forEach((attestation) => {
-      sendMessage(attestation.phoneNumber, wellnessCheck);
+    console.log(`Sending ${checks.length} messages`);
+    checks.forEach((check) => {
+      sendMessage(check.phoneNumber, wellnessCheck);
     });
 
     // update lastSent on each account
@@ -126,13 +126,13 @@ const sendMessagesToPeopleThatMustAttest = async (currentTime) => {
   }
 };
 
-const updateAttestationDocument = async (reply, phoneNumber) => {
+const updateCheckDocument = async (reply, phoneNumber) => {
   const today = moment().startOf("day");
 
   let number = phoneNumber.slice();
   if (phoneNumber.startsWith("+1")) number = phoneNumber.slice(2);
 
-  const updated = await Attestation.findOneAndUpdate(
+  const updated = await Check.findOneAndUpdate(
     {
       messageSent: { $gte: today },
       phoneNumber: number,
@@ -162,11 +162,11 @@ const notifyAdmins = async (phoneNumber) => {
 };
 
 module.exports = {
-  createAttestations,
-  createOrUpdateAttestation,
+  createChecks,
+  createOrUpdateCheck,
   getAccountsThatAreDue,
   getEmployeesOnAccount,
   notifyAdmins,
   sendMessagesToPeopleThatMustAttest,
-  updateAttestationDocument,
+  updateCheckDocument,
 };

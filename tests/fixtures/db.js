@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const Account = require("../../src/models/account");
-const Attestation = require("../../src/models/attestation");
+const Check = require("../../src/models/check");
 const User = require("../../src/models/user");
 const Employee = require("../../src/models/employee");
 
@@ -87,7 +87,7 @@ const employeeFour = {
   primaryPhone: "1234567890",
 };
 
-const attestationOne = {
+const checkOne = {
   _id: new mongoose.Types.ObjectId(),
   employeeId: employeeOne._id,
   accountId: employeeOne.accountId,
@@ -95,7 +95,7 @@ const attestationOne = {
   messageSent: new Date()
 };
 
-const attestationTwo = {
+const checkTwo = {
   _id: new mongoose.Types.ObjectId(),
   employeeId: employeeTwo._id,
   accountId: employeeTwo.accountId,
@@ -103,7 +103,7 @@ const attestationTwo = {
   messageSent: new Date()
 };
 
-const attestationThree = {
+const checkThree = {
   _id: new mongoose.Types.ObjectId(),
   employeeId: employeeThree._id,
   accountId: employeeThree.accountId,
@@ -111,7 +111,7 @@ const attestationThree = {
   messageSent: new Date()
 };
 
-const attestationFour = {
+const checkFour = {
   _id: new mongoose.Types.ObjectId(),
   employeeId: employeeFour._id,
   accountId: employeeFour.accountId,
@@ -125,7 +125,7 @@ const setupDatabase = async () => {
       Account.deleteMany(),
       User.deleteMany(),
       Employee.deleteMany(),
-      Attestation.deleteMany()
+      Check.deleteMany()
     ]);
 
     await Promise.all([
@@ -143,10 +143,10 @@ const setupDatabase = async () => {
     ]);
 
     await Promise.all([
-      new Attestation(attestationOne).save(),
-      new Attestation(attestationTwo).save(),
-      new Attestation(attestationThree).save(),
-      new Attestation(attestationFour).save(),
+      new Check(checkOne).save(),
+      new Check(checkTwo).save(),
+      new Check(checkThree).save(),
+      new Check(checkFour).save(),
     ]);
   } catch (e) {
     console.log("Error in setupDatabase():", e);
@@ -158,10 +158,10 @@ module.exports = {
   accountOne,
   accountTwoId,
   accountTwo,
-  attestationOne,
-  attestationTwo,
-  attestationThree,
-  attestationFour,
+  checkOne,
+  checkTwo,
+  checkThree,
+  checkFour,
   userOneId,
   userOne,
   userTwoId,

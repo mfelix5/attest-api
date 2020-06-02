@@ -76,8 +76,8 @@ userSchema.virtual("account", {
   foreignField: "_id",
 });
 
-userSchema.virtual("attestations", {
-  ref: "Attestation",
+userSchema.virtual("checks", {
+  ref: "Check",
   localField: "accountId",
   foreignField: "accountId",
 });

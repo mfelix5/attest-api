@@ -2,7 +2,7 @@ const express = require("express");
 const router = new express.Router();
 const _ = require("lodash");
 const MessagingResponse = require("twilio").twiml.MessagingResponse;
-const { notifyAdmins, updateAttestationDocument } = require("../messages/messages");
+const { notifyAdmins, updateCheckDocument } = require("../messages/messages");
 const {
   appResponseToYes,
   appResponseToNo,
@@ -20,13 +20,13 @@ router.post(
 
     if (message && phone) {
       if (message.toLowerCase() === "yes") {
-        const updated = await updateAttestationDocument("yes", phone);
+        const updated = await updateCheckDocument("yes", phone);
         if (updated) {
           appReply = appResponseToYes;
           notifyAdmins(phone);
         }
       } else if (message.toLowerCase() === "no") {
-        const updated = await updateAttestationDocument("no", phone);
+        const updated = await updateCheckDocument("no", phone);
         if (updated) appReply = appResponseToNo;
       } else {
         appReply = appResponseToBadText;

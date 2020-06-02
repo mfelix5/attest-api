@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const attestationSchema = new mongoose.Schema(
+const checkSchema = new mongoose.Schema(
   {
     accountId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -22,6 +22,6 @@ const attestationSchema = new mongoose.Schema(
   }
 );
 
-const Attestation = mongoose.model("Attestation", attestationSchema);
+const Check = mongoose.model("Check", checkSchema);
 
-module.exports = Attestation;
+module.exports = Check;
