@@ -10,12 +10,16 @@ const {
   employeeOne,
   userOne,
   userTwo,
-  setupDatabase,
+  setupDatabaseWithAccountsUsersEmployees,
+  setupDatabaseWithChecks,
 } = require("./fixtures/db");
 
-beforeEach(setupDatabase);
+beforeEach(async () => {
+  await setupDatabaseWithAccountsUsersEmployees();
+  await setupDatabaseWithChecks();
+});
 
-test("Should create an check with the user's accountId", async () => {
+test("Should create a check with the user's accountId", async () => {
   const response = await request(app)
     .post("/checks")
     .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
@@ -38,7 +42,7 @@ test("Should only fetch checks that belong to a user's account", async () => {
     .send()
     .expect(200);
 
-  expect(response.body.length).toEqual(2);
+  expect(response.body.length).toEqual(4);
   expect(
     response.body.every(
       (check) => check.accountId === userOne.accountId.toString()
@@ -47,6 +51,15 @@ test("Should only fetch checks that belong to a user's account", async () => {
 });
 
 test("Should filter checks by status", async () => {
+  const response1 = await request(app)
+    .get("/checks?status=messageSent")
+    .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
+    .send()
+    .expect(200);
+
+  const sentChecks = response1.body;
+  expect(sentChecks).toHaveLength(4);
+
   // set up test with check that has received response
   const newCheck = await new Check({
     employeeId: employeeOne._id,
@@ -55,15 +68,6 @@ test("Should filter checks by status", async () => {
     messageSent: new Date(),
     responseReceived: new Date()
   }).save();
-
-  const response1 = await request(app)
-    .get("/checks?status=messageSent")
-    .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
-    .send()
-    .expect(200);
-
-  const sentChecks = response1.body;
-  expect(sentChecks).toHaveLength(2);
 
   const response2 = await request(app)
     .get("/checks?status=responseReceived")

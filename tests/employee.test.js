@@ -8,10 +8,10 @@ const {
   employeeFour,
   userOne,
   userTwo,
-  setupDatabase,
+  setupDatabaseWithAccountsUsersEmployees,
 } = require("./fixtures/db");
 
-beforeEach(setupDatabase);
+beforeEach(setupDatabaseWithAccountsUsersEmployees);
 
 test("Should create employee with the user's accountId", async () => {
   const response = await request(app)
