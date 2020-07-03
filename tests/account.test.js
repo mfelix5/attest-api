@@ -1,9 +1,9 @@
 const request = require('supertest')
 const app = require('../src/app')
 const Account = require('../src/models/account')
-const { accountOne, userOne, setupDatabase } = require('./fixtures/db')
+const { accountOne, userOne, setupDatabaseWithAccountsUsersEmployees } = require('./fixtures/db')
 
-beforeEach(setupDatabase);
+beforeEach(setupDatabaseWithAccountsUsersEmployees);
 
 test('Should create a new account', async () => {
   const name = "My Test Company";
